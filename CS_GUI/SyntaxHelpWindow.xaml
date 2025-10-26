@@ -1,0 +1,71 @@
+﻿<Window x:Class="CS_GUI.SyntaxHelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CS_GUI"
+        mc:Ignorable="d"
+        Title="Syntax Help" Height="450" Width="1000">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+    <StackPanel>
+        <TextBlock Text="Syntax Help" FontSize="24" Margin="10,10,0,10" FontWeight="Bold"/>
+            <TextBlock Text="Valid Tokens &amp; Operators" FontSize="16" Margin="10,10,0,10" FontWeight ="Bold" Foreground="DeepPink"/>
+            <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <!-- very ugly, but don't think theres a better way to do this when using `Grid`.. Maybe change from `Grid` to `StackPanel` -->
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Token/Operator" FontWeight="Bold"/>
+            <TextBlock Grid.Column="1" Text="Example" FontWeight="Bold"/>
+            <TextBlock Grid.Column="2" Text="Notes" FontWeight="Bold"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Digits [0-9]"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="1, 2, 3"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Addition [+]"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="1 + 2 = 3"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Subtraction [-]"/>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="3 - 2 = 1"/>
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="Can be used as an unary operator to represent negative numbers. For example: -5 + 5 = 0"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Multiplication [*]"/>
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="2 * 3 = 6"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Division [/]"/>
+            <TextBlock Grid.Row="5" Grid.Column="1" Text="6 / 2 = 3"/>
+
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Remainder [%]"/>
+            <TextBlock Grid.Row="6" Grid.Column="1" Text="5 % 2 = 1"/>
+
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Power [^]"/>
+            <TextBlock Grid.Row="7" Grid.Column="1" Text="2 ^ 3 = 8"/>
+
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Parentheses [( )]"/>
+            <TextBlock Grid.Row="8" Grid.Column="1" Text="(1 + 2) * 3 = 9"/>
+
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Floating Point [.]"/>
+            <TextBlock Grid.Row="9" Grid.Column="1" Text="3.2 + 2.3 = 5.5"/>
+
+
+        </Grid>
+            <TextBlock Text="NOTE: All expressions are left-associative and BODMAS/BIDMAS rules apply" FontSize="12" FontWeight="Bold" Margin="10,10,0,10"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
