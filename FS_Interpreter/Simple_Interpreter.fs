@@ -13,20 +13,24 @@ type terminal =
     | Lpar | Rpar 
     | Num of float
 
+//Helper functions
 let str2lst s = [for c in s -> c]
 let isblank c = System.Char.IsWhiteSpace c
 let isdigit c = System.Char.IsDigit c
 let intVal (c:char) = (int)((int)c - (int)'0')
 
+// Exceptions
 let parseError = System.Exception("Parser error")
 let lexError = System.Exception("Lexer error")
 let runtimeError = System.Exception("Runtime error")
 
+// Recursive digit scanner 
 let rec scInt(iStr, iVal:float) = 
     match iStr with
     | c :: tail when isdigit c -> scInt(tail, 10.0*iVal+(float(intVal c)))
     | _ -> (iStr, iVal)
 
+// Recursive fraction scanner
 let rec scFrac(iStr, fracVal, divisor) =
     match iStr with
     | c :: tail when isdigit c -> 
@@ -34,6 +38,7 @@ let rec scFrac(iStr, fracVal, divisor) =
         scFrac(tail, newFrac, divisor * 10.0)
     | _ -> (iStr, fracVal)
 
+// Exponent scanner
 let scExponent(iStr) =
     match iStr with
     | [] -> ([], 0.0)
@@ -51,6 +56,7 @@ let scExponent(iStr) =
         | _ -> raise lexError
     | _ -> (iStr, 0.0)
 
+// Number scanner
 let scNum(iStr) =
     match iStr with
     | c :: tail when isdigit c -> 
@@ -65,6 +71,7 @@ let scNum(iStr) =
         (afterExp, result)
     | _ -> raise lexError
 
+// Lexer function
 let lexer input = 
     let rec scan input =
         match input with
@@ -83,20 +90,12 @@ let lexer input =
         | _ -> raise lexError
     scan (str2lst input)
 
+// Function to get input from console
 let getInputString() : string = 
     Console.Write("Enter an expression: ")
     Console.ReadLine()
 
-// Grammar in BNF:
-// <E>        ::= <T> <Eopt>
-// <Eopt>     ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
-// <T>        ::= <P> <Topt>
-// <Topt>     ::= "*" <P> <Topt> | "/" <P> <Topt> | "%" <P> <Topt> | <empty>
-// <P>        ::= <U> <Popt>
-// <Popt>     ::= "^" <P> | <empty>
-// <U>        ::= "-" <U> | <NR>
-// <NR>       ::= "Num" <value> | "(" <E> ")"
-
+// Parser function
 let parser tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt tList = 
@@ -129,6 +128,7 @@ let parser tList =
         | _ -> raise parseError
     E tList
 
+// Parser and evaluator function
 let parseNeval tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt (tList, value) = 
@@ -171,6 +171,7 @@ let parseNeval tList =
         | _ -> raise parseError
     E tList
 
+// Function to print list of terminals
 let rec printTList (lst:list<terminal>) : list<string> = 
     match lst with
     | head::tail -> Console.Write("{0} ",head.ToString())
@@ -179,6 +180,8 @@ let rec printTList (lst:list<terminal>) : list<string> =
             []
 
 module public GUIInterpret =
+
+// Function to interpret input string and return result as string
 
     let interpret(input:string) : string =
         let oList = lexer input
@@ -197,6 +200,17 @@ let main argv  =
     let Out = parseNeval oList
     Console.WriteLine("Result = {0}", snd Out)
     0
+
+
+// Grammar in BNF:
+// <E>        ::= <T> <Eopt>
+// <Eopt>     ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
+// <T>        ::= <P> <Topt>
+// <Topt>     ::= "*" <P> <Topt> | "/" <P> <Topt> | "%" <P> <Topt> | <empty>
+// <P>        ::= <U> <Popt>
+// <Popt>     ::= "^" <P> | <empty>
+// <U>        ::= "-" <U> | <NR>
+// <NR>       ::= "Num" <value> | "(" <E> ")"
 
 
 //// TEST CASES ONLY FOR REFERENCE TO USE: CHECK INTERPRETER FUNCTIONALITY

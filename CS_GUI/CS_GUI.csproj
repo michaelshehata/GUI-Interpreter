@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,6 +8,6 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FS_Interpreter\FS_Interpreter.fsproj"/>
+    <ProjectReference Include="..\FS_Interpreter\FS_Interpreter.fsproj" />
   </ItemGroup>
-</Project>
+<ItemGroup><Compile Include="..\FS_Interpreter\Simple_Interpreter.fs" /></ItemGroup></Project>

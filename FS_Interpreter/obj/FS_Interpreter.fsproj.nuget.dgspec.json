@@ -1,24 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "G:\\University\\Year 3\\Advanced Programming\\InterpreterProject\\FS_Interpreter\\FS_Interpreter.fsproj": {}
+    "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {}
   },
   "projects": {
-    "G:\\University\\Year 3\\Advanced Programming\\InterpreterProject\\FS_Interpreter\\FS_Interpreter.fsproj": {
+    "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\University\\Year 3\\Advanced Programming\\InterpreterProject\\FS_Interpreter\\FS_Interpreter.fsproj",
+        "projectUniqueName": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
         "projectName": "FS_Interpreter",
-        "projectPath": "G:\\University\\Year 3\\Advanced Programming\\InterpreterProject\\FS_Interpreter\\FS_Interpreter.fsproj",
-        "packagesPath": "C:\\Users\\luker\\.nuget\\packages\\",
-        "outputPath": "G:\\University\\Year 3\\Advanced Programming\\InterpreterProject\\FS_Interpreter\\obj\\",
+        "projectPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+        "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\luker\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -27,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "C:\\Program Files\\dotnet\\sdk\\9.0.306\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
