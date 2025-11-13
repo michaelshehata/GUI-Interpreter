@@ -6,41 +6,104 @@
         xmlns:local="clr-namespace:CS_GUI"
         mc:Ignorable="d"
         Title="Math Evaluator" Height="450" Width="800">
-  <Grid>
-    <local:TopMenu/>
-    <Label Content="Math Evaluator" FontSize="20" FontWeight="bold" Foreground="DeepPink" HorizontalAlignment="Left" Margin="36,24,0,0" VerticalAlignment="Top"/>
-    <TextBox x:Name="inputBox" 
+    <Grid>
+        <local:TopMenu/>
+
+        <Label Content="Math Evaluator"
+               FontSize="20"
+               FontWeight="bold"
+               Foreground="DeepPink"
+               HorizontalAlignment="Left"
+               Margin="36,24,0,0"
+               VerticalAlignment="Top"/>
+
+        <TextBox x:Name="inputBox" 
                  HorizontalAlignment="Left" 
                  Margin="41,82,0,0" 
                  TextWrapping="Wrap" 
                  Text="" 
                  VerticalAlignment="Top"
                  Width="300"
-                 IsReadOnly="False"
-                 />
+                 IsReadOnly="False" />
 
-    <TextBox x:Name="outputBox"
+        <TextBox x:Name="outputBox"
                  Margin="461,82,39,0"
                  TextWrapping="Wrap"
                  Text=""
                  VerticalAlignment="Top"
                  TextChanged="TextBox_TextChanged"
-                 IsReadOnly="True"
-                 />
-    <TextBox x:Name="errorBox" 
-            HorizontalAlignment="Left"
-            Margin="41,123,0,0"
-            TextWrapping="Wrap"
-            Text=""
-            VerticalAlignment="Top"
-            Width="400"
-            TextChanged="TextBox_TextChanged"
-            IsReadOnly="True" Foreground="Red"
-                 />
-    <Button x:Name="buttonCalculate" Content="Calculate" HorizontalAlignment="Left" Margin="349,81,0,0" VerticalAlignment="Top" Click="buttonCalculate_Click"/>
-    <Label Content="Input:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="39,56,0,0"/>
-    <Label Content="Output:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="459,56,0,0"/>
-    <Label Content="Error:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="39,100,0,0" RenderTransformOrigin="0.646,1.652"/>
+                 IsReadOnly="True" />
 
-  </Grid>
+        <TextBox x:Name="errorBox" 
+                 HorizontalAlignment="Left"
+                 Margin="41,123,0,0"
+                 TextWrapping="Wrap"
+                 Text=""
+                 VerticalAlignment="Top"
+                 Width="400"
+                 TextChanged="TextBox_TextChanged"
+                 IsReadOnly="True"
+                 Foreground="Red" />
+
+        <Button x:Name="buttonCalculate"
+                Content="Calculate"
+                HorizontalAlignment="Left"
+                Margin="349,81,0,0"
+                VerticalAlignment="Top"
+                Click="buttonCalculate_Click"/>
+
+        <Label Content="Input:"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="39,56,0,0"/>
+
+        <Label Content="Output:"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="459,56,0,0"/>
+
+        <Label Content="Error:"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="39,100,0,0"
+               RenderTransformOrigin="0.646,1.652"/>
+
+        <Label Content="History:"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="459,100,0,0"
+            RenderTransformOrigin="0.646,1.652"/>
+
+        <ListBox x:Name="HistoryBox"
+                 ItemsSource="{Binding History}"
+                 Margin="461,123,39,158">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding Expression}"
+                       FontSize="14"
+                       Margin="0,0,10,0" />
+
+                        <TextBlock Text="=" 
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Margin="0,0,10,0" />
+
+                        <TextBlock Text="{Binding Result}"
+                       FontSize="14"
+                       FontWeight="Bold" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
+        <Button x:Name="ClearHistoryButton"
+                Content="Clear"
+                HorizontalAlignment="Left"
+                Margin="730,281,0,0"
+                VerticalAlignment="Top"
+                Click="ClearHistoryButton_Click"/>
+
+
+    </Grid>
 </Window>
