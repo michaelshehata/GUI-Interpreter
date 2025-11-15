@@ -7,6 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FS_Interpreter\FS_Interpreter.fsproj" />
   </ItemGroup></Project>

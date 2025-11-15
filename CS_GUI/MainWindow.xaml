@@ -104,6 +104,10 @@
                 VerticalAlignment="Top"
                 Click="ClearHistoryButton_Click"/>
 
+        <local:PlottingArea x:Name="PlotArea"
+                    Margin="41,146,359,38"/>
+
+
 
     </Grid>
 </Window>

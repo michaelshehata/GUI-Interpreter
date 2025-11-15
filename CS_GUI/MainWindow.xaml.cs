@@ -49,6 +49,9 @@ namespace CS_GUI
                 string interpreterReturn = Simple_Interpreter.GUIInterpret.interpret(inputText);
                 outputBox.Text = interpreterReturn;
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
+
+                // TEMPORARY TESTING, will take out when doing proper implementation
+                PlotArea.PlotFunction(x => x * x, -10, 10, 0.1);
             }
             catch (Exception ex)
             {
