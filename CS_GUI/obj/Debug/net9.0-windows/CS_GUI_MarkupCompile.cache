@@ -1,20 +1,20 @@
 ﻿CS_GUI
-1.0.0.0
+
 
 winexe
 C#
 .cs
-c:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\
 CS_GUI
 none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-c:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\App.xaml
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\App.xaml
 3-423111156
 
-9-1344893996
-2021586156083
+7729976515
+202-1064915627
 MainWindow.xaml;SyntaxHelpWindow.xaml;TopMenu.xaml;
 
-True
+False
 

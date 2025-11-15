@@ -126,7 +126,11 @@ let parser tList =
                           | Rpar :: tail -> tail
                           | _ -> raise parseError
         | _ -> raise parseError
-    E tList
+    let remaining = E tList
+    match remaining with
+    | [] -> []
+    |   _ -> raise parseError
+    
 
 // Parser and evaluator function
 let parseNeval tList = 
@@ -169,7 +173,11 @@ let parseNeval tList =
                           | Rpar :: tail -> (tail, tval)
                           | _ -> raise parseError
         | _ -> raise parseError
-    E tList
+    let (remaining, result) = E tList
+    match remaining with
+    | [] -> (remaining, result)
+    | _ -> raise parseError
+    
 
 // Function to print list of terminals
 let rec printTList (lst:list<terminal>) : list<string> = 

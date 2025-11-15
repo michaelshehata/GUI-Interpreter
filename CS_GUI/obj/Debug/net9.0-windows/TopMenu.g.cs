@@ -52,7 +52,7 @@ namespace CS_GUI {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CS_GUI;V1.0.0.0;component/topmenu.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CS_GUI;component/topmenu.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\TopMenu.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
