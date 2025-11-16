@@ -18,6 +18,9 @@ type terminal =
     | Assign          // Assignment operator (for future use)
     | Semicolon       // Statement terminator (for future use)
 
+type SymbolTable = Map<string, float>
+let mutable symbolTable : SymbolTable = Map.empty
+
 // Helper functions
 let str2lst s = [for c in s -> c]
 let isblank c = System.Char.IsWhiteSpace c
@@ -147,6 +150,7 @@ let parser tList =
     and NR tList =
         match tList with 
         | Num value :: tail -> tail
+        | Ident name :: tail -> tail
         | Func name :: Lpar :: tail -> 
             match E tail with 
             | Rpar :: tail -> tail
@@ -204,6 +208,10 @@ let parseNeval tList =
     and NR tList =
         match tList with 
         | Num value :: tail -> (tail, value)
+        | Ident name :: tail ->
+            match symbolTable.TryFind name with
+            | Some value -> (tail, value)
+            | None -> raise (System.Exception($"Variable '{name}' not defined"))
         | Func name :: Lpar :: tail ->
             let (afterExpr, argValue) = E tail
             match afterExpr with
@@ -244,6 +252,18 @@ let parseNeval tList =
     match remaining with
     | [] -> (remaining, result)
     | _ -> raise parseError
+
+// CHANGE 1: Statement parser - handles both assignments and expressions
+let parseStatement tList = 
+    match tList with
+    | Ident name :: Assign :: tail ->
+        // This is an assignment: variable = expression
+        let (remaining, value) = parseNeval tail
+        symbolTable <- symbolTable.Add(name, value)
+        (remaining, value)
+    | _ -> 
+        // Regular expression (no assignment)
+        parseNeval tList
 
 // Function to print list of terminals (for debugging)
 let rec printTList (lst:list<terminal>) : list<string> = 
@@ -384,15 +404,27 @@ module Testing =
 
 // Public interface for GUI integration
 module public GUIInterpret =
+    
     let interpret(input:string) : string =
         try
             let oList = lexer input
             let _ = printTList oList
-            let _ = printTList (parser oList)
-            let (_, result) = parseNeval oList
+            let (_, result) = parseStatement oList
             result.ToString()
         with
         | ex -> raise (System.Exception(ex.Message))
+    
+    let evaluateExpression(expression:string, xValue:float) : float =
+        try
+            // Store x value in symbol table
+            symbolTable <- symbolTable.Add("x", xValue)
+            
+            // Lex and evaluate the expression
+            let oList = lexer expression
+            let (_, result) = parseNeval oList
+            result
+        with
+        | ex -> raise (System.Exception($"Error evaluating expression: {ex.Message}"))
 
 // Entry point
 [<EntryPoint>]
@@ -423,8 +455,7 @@ let main argv =
     try
         let oList = lexer input
         let _ = printTList oList
-        let _ = printTList (parser oList)
-        let Out = parseNeval oList
+        let Out = parseStatement oList
         Console.WriteLine("Result = {0}", snd Out)
         0
     with
@@ -435,6 +466,8 @@ let main argv =
         1
 
 // Grammar in BNF:
+// CHANGE 3: Updated grammar to include statement rule
+// <Statement> ::= <Ident> "=" <E> | <E>
 // <E>        ::= <T> <Eopt>
 // <Eopt>     ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
 // <T>        ::= <P> <Topt>
@@ -442,4 +475,4 @@ let main argv =
 // <P>        ::= <U> <Popt>
 // <Popt>     ::= "^" <P> | <empty>
 // <U>        ::= "-" <U> | <NR>
-// <NR>       ::= "Num" <value> | <Func> "(" <E> ")" | "(" <E> ")"
+// <NR>       ::= "Num" <value> | "Ident" <name> | <Func> "(" <E> ")" | "(" <E> ")"
