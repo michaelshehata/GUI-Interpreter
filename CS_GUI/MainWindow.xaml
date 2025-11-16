@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CS_GUI"
         mc:Ignorable="d"
-        Title="Math Evaluator" Height="450" Width="800">
+        Title="Math Evaluator" Height="478" Width="842">
     <Grid>
         <local:TopMenu/>
 
@@ -27,7 +28,7 @@
                  IsReadOnly="False" />
 
         <TextBox x:Name="outputBox"
-                 Margin="461,82,39,0"
+                 Margin="486,82,14,0"
                  TextWrapping="Wrap"
                  Text=""
                  VerticalAlignment="Top"
@@ -52,6 +53,13 @@
                 VerticalAlignment="Top"
                 Click="buttonCalculate_Click"/>
 
+        <Button x:Name="buttonPlot"
+            Content="Plot"
+            HorizontalAlignment="Left"
+            Margin="349,100,0,0"
+            VerticalAlignment="Top"
+            Click="buttonPlot_Click" Width="52"/>
+
         <Label Content="Input:"
                HorizontalAlignment="Left"
                VerticalAlignment="Top"
@@ -60,7 +68,7 @@
         <Label Content="Output:"
                HorizontalAlignment="Left"
                VerticalAlignment="Top"
-               Margin="459,56,0,0"/>
+               Margin="484,56,0,0"/>
 
         <Label Content="Error:"
                HorizontalAlignment="Left"
@@ -69,43 +77,113 @@
                RenderTransformOrigin="0.646,1.652"/>
 
         <Label Content="History:"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Margin="459,100,0,0"
-            RenderTransformOrigin="0.646,1.652"/>
+       HorizontalAlignment="Left"
+       VerticalAlignment="Top"
+       Margin="484,100,0,0"
+       RenderTransformOrigin="0.646,1.652"/>
 
-        <ListBox x:Name="HistoryBox"
-                 ItemsSource="{Binding History}"
-                 Margin="461,123,39,158">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding Expression}"
-                       FontSize="14"
-                       Margin="0,0,10,0" />
+        <!-- Right-hand area for history list + clear button -->
+        <Grid Margin="486,123,14,38">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-                        <TextBlock Text="=" 
-                       FontSize="14"
-                       FontWeight="Bold"
-                       Margin="0,0,10,0" />
+            <ListBox x:Name="HistoryBox"
+             Grid.Row="0"
+             ItemsSource="{Binding History}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding Expression}"
+                               FontSize="14"
+                               Margin="0,0,10,0" />
 
-                        <TextBlock Text="{Binding Result}"
-                       FontSize="14"
-                       FontWeight="Bold" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                            <TextBlock Text="="
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Margin="0,0,10,0" />
 
-        </ListBox>
-        <Button x:Name="ClearHistoryButton"
-                Content="Clear"
+                            <TextBlock Text="{Binding Result}"
+                               FontSize="14"
+                               FontWeight="Bold" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Button x:Name="ClearHistoryButton"
+            Grid.Row="1"
+            Content="Clear"
+            HorizontalAlignment="Right"
+            Margin="0,8,0,0"
+            Width="60"
+            Click="ClearHistoryButton_Click"/>
+        </Grid>
+
+
+        <!-- Left-hand plotting area + parameter controls -->
+        <Grid Margin="41,146,359,38">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <local:PlottingArea x:Name="PlotArea"
+                        Grid.Row="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" />
+
+            <StackPanel Grid.Row="1"
+                Orientation="Horizontal"
+                Margin="0,10,0,0"
                 HorizontalAlignment="Left"
-                Margin="730,281,0,0"
-                VerticalAlignment="Top"
-                Click="ClearHistoryButton_Click"/>
+                VerticalAlignment="Center">
 
-        <local:PlottingArea x:Name="PlotArea"
-                    Margin="41,146,359,38"/>
+                <!-- Min X-->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+                    <TextBlock Text="Min X:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"
+                       FontWeight="Bold"/>
+                    <xctk:DoubleUpDown x:Name="MinXDoubleUpDown" Width="70"
+                               Height="24"
+                               Increment="0.1"
+                               Value="1" />
+                </StackPanel>
+
+                <!-- Max X -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+                    <TextBlock Text="Max X:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"
+                       FontWeight="Bold"/>
+                    <xctk:DoubleUpDown x:Name="MaxXDoubleUpDown" Width="70"
+                               Height="24"
+                               Increment="0.1"
+                               Value="100" />
+                </StackPanel>
+
+                <!-- Step -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Step:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"
+                       FontWeight="Bold"/>
+                    <xctk:DoubleUpDown x:Name="StepDoubleUpDown" Width="70"
+                               Height="24"
+                               Increment="0.1"
+                               Value="1" />
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
+
+
+
+
+
+
 
 
 

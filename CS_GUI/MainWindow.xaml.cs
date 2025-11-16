@@ -50,8 +50,6 @@ namespace CS_GUI
                 outputBox.Text = interpreterReturn;
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
 
-                // TEMPORARY TESTING, will take out when doing proper implementation
-                PlotArea.PlotFunction(x => x * x, -10, 10, 0.1);
             }
             catch (Exception ex)
             {
@@ -63,6 +61,29 @@ namespace CS_GUI
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)
         {
             History.Clear();
+        }
+
+        private void buttonPlot_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = "";
+
+                string function = inputBox.Text;
+                // strip leading "y ="
+                string expr = function.Contains("=")
+                    ? function.Split("=")[1].Trim()
+                    : function.Trim();
+
+                double minX = MinXDoubleUpDown.Value ?? 0;
+                double maxX = MaxXDoubleUpDown.Value ?? 0;
+                double step = StepDoubleUpDown.Value ?? 1;
+                PlotArea.PlotFunction(expr, minX, maxX, step);
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
         }
     }
 }
