@@ -4,24 +4,27 @@
 // Reference: Peter Sestoft, Grammars and parsing with F#, Tech. Report
 
 // Group 21 Advanced Programming
-// Michael Shehata, Ali Jamjoum , Luke Wilson
+// Michael Shehata, Ali Jamjoum, Luke Wilson
 
 open System
 
+// Terminal types for lexer
 type terminal = 
     | Add | Sub | Mul | Div | Mod | Pow
     | Lpar | Rpar 
     | Num of float
-    | Sin | Cos | Tan | Log | Exp
-    | Ident of string
-    | Assign
-    | Semicolon
+    | Func of string  // Built-in functions (sin, cos, etc.)
+    | Ident of string // Variable names (for future use)
+    | Assign          // Assignment operator (for future use)
+    | Semicolon       // Statement terminator (for future use)
 
-//Helper functions
+// Helper functions
 let str2lst s = [for c in s -> c]
 let isblank c = System.Char.IsWhiteSpace c
 let isdigit c = System.Char.IsDigit c
-let intVal (c:char) = (int)((int)c - (int)'0')
+let isLetter c = System.Char.IsLetter c
+let isLetterOrDigit c = System.Char.IsLetterOrDigit c
+let intVal (c:char) = int c - int '0'
 
 // Exceptions
 let parseError = System.Exception("Parser error")
@@ -42,7 +45,7 @@ let rec scFrac(iStr, fracVal, divisor) =
         scFrac(tail, newFrac, divisor * 10.0)
     | _ -> (iStr, fracVal)
 
-// Exponent scanner
+// Exponent scanner for exponential notation (e.g., 1.5E3)
 let scExponent(iStr) =
     match iStr with
     | [] -> ([], 0.0)
@@ -60,7 +63,7 @@ let scExponent(iStr) =
         | _ -> raise lexError
     | _ -> (iStr, 0.0)
 
-// Number scanner
+// Number scanner - handles integers, floats, and exponential notation
 let scNum(iStr) =
     match iStr with
     | c :: tail when isdigit c -> 
@@ -75,7 +78,22 @@ let scNum(iStr) =
         (afterExp, result)
     | _ -> raise lexError
 
-// Lexer function
+// Scan an identifier or function name
+let rec scIdent(iStr, acc: string) =
+    match iStr with
+    | c :: tail when isLetterOrDigit c || c = '_' -> 
+        scIdent(tail, acc + string c)
+    | _ -> (iStr, acc)
+
+// Check if a name is a recognized built-in function
+let recognizeFunction (name: string) : terminal option =
+    match name.ToLower() with
+    | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
+    | "exp" | "log" | "ln" | "sqrt" | "abs" 
+    | "floor" | "ceil" | "round" -> Some (Func (name.ToLower()))
+    | _ -> None
+
+// Lexer function - converts input string to list of terminals
 let lexer input = 
     let rec scan input =
         match input with
@@ -88,18 +106,21 @@ let lexer input =
         | '^'::tail -> Pow :: scan tail
         | '('::tail -> Lpar :: scan tail
         | ')'::tail -> Rpar :: scan tail
+        | '='::tail -> Assign :: scan tail
+        | ';'::tail -> Semicolon :: scan tail
         | c :: tail when isblank c -> scan tail
-        | c :: tail when isdigit c -> let (remaining, numVal) = scNum(input)
-                                      Num numVal :: scan remaining
+        | c :: tail when isdigit c -> 
+            let (remaining, numVal) = scNum(input)
+            Num numVal :: scan remaining
+        | c :: tail when isLetter c -> 
+            let (remaining, name) = scIdent(tail, string c)
+            match recognizeFunction name with
+            | Some funcToken -> funcToken :: scan remaining
+            | None -> Ident name :: scan remaining
         | _ -> raise lexError
     scan (str2lst input)
 
-// Function to get input from console
-let getInputString() : string = 
-    Console.Write("Enter an expression: ")
-    Console.ReadLine()
-
-// Parser function
+// Parser function - validates syntax without evaluation
 let parser tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt tList = 
@@ -126,72 +147,120 @@ let parser tList =
     and NR tList =
         match tList with 
         | Num value :: tail -> tail
-        | Lpar :: tail -> match E tail with 
-                          | Rpar :: tail -> tail
-                          | _ -> raise parseError
+        | Func name :: Lpar :: tail -> 
+            match E tail with 
+            | Rpar :: tail -> tail
+            | _ -> raise parseError
+        | Lpar :: tail -> 
+            match E tail with 
+            | Rpar :: tail -> tail
+            | _ -> raise parseError
         | _ -> raise parseError
     let remaining = E tList
     match remaining with
     | [] -> []
-    |   _ -> raise parseError
-    
+    | _ -> raise parseError
 
-// Parser and evaluator function
+// Parser and evaluator function - parses and computes result
 let parseNeval tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt (tList, value) = 
         match tList with
-        | Add :: tail -> let (tLst, tval) = T tail
-                         Eopt (tLst, value + tval)
-        | Sub :: tail -> let (tLst, tval) = T tail
-                         Eopt (tLst, value - tval)
+        | Add :: tail -> 
+            let (tLst, tval) = T tail
+            Eopt (tLst, value + tval)
+        | Sub :: tail -> 
+            let (tLst, tval) = T tail
+            Eopt (tLst, value - tval)
         | _ -> (tList, value)
     and T tList = (P >> Topt) tList
     and Topt (tList, value) =
         match tList with
-        | Mul :: tail -> let (tLst, tval) = P tail
-                         Topt (tLst, value * tval)
-        | Div :: tail -> let (tLst, tval) = P tail
-                         if tval = 0.0 then raise runtimeError
-                         Topt (tLst, value / tval)
-        | Mod :: tail -> let (tLst, tval) = P tail
-                         if tval = 0.0 then raise runtimeError
-                         Topt (tLst, value % tval)
+        | Mul :: tail -> 
+            let (tLst, tval) = P tail
+            Topt (tLst, value * tval)
+        | Div :: tail -> 
+            let (tLst, tval) = P tail
+            if tval = 0.0 then raise runtimeError
+            Topt (tLst, value / tval)
+        | Mod :: tail -> 
+            let (tLst, tval) = P tail
+            if tval = 0.0 then raise runtimeError
+            Topt (tLst, value % tval)
         | _ -> (tList, value)
     and P tList = (U >> Popt) tList
     and Popt (tList, value) =
         match tList with
-        | Pow :: tail -> let (tLst, pval) = P tail
-                         (tLst, value ** pval)
+        | Pow :: tail -> 
+            let (tLst, pval) = P tail
+            (tLst, value ** pval)
         | _ -> (tList, value)
     and U tList =
         match tList with
-        | Sub :: tail -> let (tLst, uval) = U tail
-                         (tLst, -uval)
+        | Sub :: tail -> 
+            let (tLst, uval) = U tail
+            (tLst, -uval)
         | _ -> NR tList
     and NR tList =
         match tList with 
         | Num value :: tail -> (tail, value)
-        | Lpar :: tail -> let (tLst, tval) = E tail
-                          match tLst with 
-                          | Rpar :: tail -> (tail, tval)
-                          | _ -> raise parseError
+        | Func name :: Lpar :: tail ->
+            let (afterExpr, argValue) = E tail
+            match afterExpr with
+            | Rpar :: rest ->
+                let result = 
+                    match name with
+                    // Trigonometric functions (angles in radians)
+                    | "sin" -> Math.Sin(argValue)
+                    | "cos" -> Math.Cos(argValue)
+                    | "tan" -> Math.Tan(argValue)
+                    | "asin" -> Math.Asin(argValue)
+                    | "acos" -> Math.Acos(argValue)
+                    | "atan" -> Math.Atan(argValue)
+                    // Exponential and logarithmic
+                    | "exp" -> Math.Exp(argValue)
+                    | "log" -> Math.Log10(argValue)  // Base 10
+                    | "ln" -> Math.Log(argValue)     // Natural logarithm
+                    // Utility functions
+                    | "sqrt" -> 
+                        if argValue < 0.0 then 
+                            raise (System.Exception("Cannot take square root of negative number"))
+                        Math.Sqrt(argValue)
+                    | "abs" -> Math.Abs(argValue)
+                    | "floor" -> Math.Floor(argValue)
+                    | "ceil" -> Math.Ceiling(argValue)
+                    | "round" -> Math.Round(argValue)
+                    | _ -> raise (System.Exception($"Unknown function: {name}"))
+                (rest, result)
+            | _ -> raise parseError
+        | Lpar :: tail -> 
+            let (tLst, tval) = E tail
+            match tLst with 
+            | Rpar :: tail -> (tail, tval)
+            | _ -> raise parseError
         | _ -> raise parseError
+    
     let (remaining, result) = E tList
     match remaining with
     | [] -> (remaining, result)
     | _ -> raise parseError
-    
 
-// Function to print list of terminals
+// Function to print list of terminals (for debugging)
 let rec printTList (lst:list<terminal>) : list<string> = 
     match lst with
-    | head::tail -> Console.Write("{0} ",head.ToString())
-                    printTList tail
-    | [] -> Console.Write("EOL\n")
-            []
+    | head::tail -> 
+        Console.Write("{0} ", head.ToString())
+        printTList tail
+    | [] -> 
+        Console.Write("EOL\n")
+        []
 
-// Testing suite
+// Function to get input from console
+let getInputString() : string = 
+    Console.Write("Enter an expression: ")
+    Console.ReadLine()
+
+// Testing suite module
 module Testing =
     
     type TestCase = {
@@ -209,7 +278,7 @@ module Testing =
         Description: string
     }
     
-    // Test cases 
+    // Comprehensive test cases
     let testCases = [
         // Basic arithmetic
         { Expression = "3 + 4 * 5"; Expected = 23.0; Description = "BODMAS test" }
@@ -241,17 +310,33 @@ module Testing =
         { Expression = "(2 + 3) * (4 - 1)"; Expected = 15.0; Description = "Multiple parentheses" }
         { Expression = "10 / 2 + 3 * 4"; Expected = 17.0; Description = "Division and multiplication" }
         
-        // Exponential notation (if implemented)
+        // Exponential notation
         { Expression = "1.5E3"; Expected = 1500.0; Description = "Exponential notation (E)" }
         { Expression = "2.5e-2"; Expected = 0.025; Description = "Exponential notation (e-)" }
         { Expression = "1E+2"; Expected = 100.0; Description = "Exponential notation (E+)" }
+
+        // Built-in functions
+        { Expression = "sin(0)"; Expected = 0.0; Description = "sin(0)" }
+        { Expression = "cos(0)"; Expected = 1.0; Description = "cos(0)" }
+        { Expression = "sqrt(16)"; Expected = 4.0; Description = "sqrt(16)" }
+        { Expression = "abs(-5)"; Expected = 5.0; Description = "abs(-5)" }
+        { Expression = "exp(0)"; Expected = 1.0; Description = "exp(0)" }
+        { Expression = "ln(1)"; Expected = 0.0; Description = "ln(1)" }
+        { Expression = "floor(3.7)"; Expected = 3.0; Description = "floor(3.7)" }
+        { Expression = "ceil(3.2)"; Expected = 4.0; Description = "ceil(3.2)" }
+        { Expression = "round(3.5)"; Expected = 4.0; Description = "round(3.5)" }
+        
+        // Function composition
+        { Expression = "sin(0) + cos(0)"; Expected = 1.0; Description = "Function in expression" }
+        { Expression = "sqrt(4) * 3"; Expected = 6.0; Description = "Function result in multiplication" }
+        { Expression = "abs(-2 + -3)"; Expected = 5.0; Description = "Function with expression argument" }
     ]
     
     let runTest (testCase: TestCase) : TestResult =
         try
             let tokens = lexer testCase.Expression
             let (_, result) = parseNeval tokens
-            let passed = abs(result - testCase.Expected) < 0.0001 // Float comparison tolerance
+            let passed = abs(result - testCase.Expected) < 0.0001
             {
                 Expression = testCase.Expression
                 Expected = testCase.Expected
@@ -276,7 +361,6 @@ module Testing =
         let passed = results |> List.filter (fun r -> r.Passed) |> List.length
         let failed = results |> List.filter (fun r -> not r.Passed) |> List.length
         
-        printfn "\n========================================="
         printfn "TEST RESULTS"
         printfn "========================================="
         printfn "Total: %d | Passed: %d | Failed: %d\n" (passed + failed) passed failed
@@ -297,56 +381,58 @@ module Testing =
         
         printfn "========================================="
         (passed, failed)
+
+// Public interface for GUI integration
 module public GUIInterpret =
-
-// Function to interpret input string and return result as string
-
     let interpret(input:string) : string =
-        let oList = lexer input
-        let _ = printTList oList
-        let _ = printTList (parser oList)
-        let (_, result) = parseNeval oList
-        result.ToString()
-    
+        try
+            let oList = lexer input
+            let _ = printTList oList
+            let _ = printTList (parser oList)
+            let (_, result) = parseNeval oList
+            result.ToString()
+        with
+        | ex -> $"Error: {ex.Message}"
+
+// Entry point
 [<EntryPoint>]
-let main argv  =
+let main argv =
     Console.WriteLine("Simple Interpreter - Starting Tests...")
-    Console.WriteLine("=" |> String.replicate 50)
+    Console.WriteLine(String.replicate 50 "=")
     
-    // Run tests and get results
+    // Run automated tests
     let (passed, failed) = Testing.runAllTests()
     
-    // Provide clear feedback based on test results
+    // Provide feedback
     if failed = 0 then
         Console.ForegroundColor <- ConsoleColor.Green
-        Console.WriteLine("\nALL TESTS PASSED!\n")
+        Console.WriteLine("\n✓ ALL TESTS PASSED!\n")
         Console.ResetColor()
     else
         Console.ForegroundColor <- ConsoleColor.Red
-        Console.WriteLine($"\nWARNING: {failed} test(s) FAILED.\n")
+        Console.WriteLine($"\n✗ WARNING: {failed} test(s) FAILED.\n")
         Console.ResetColor()
     
-    // Continue to interactive mode
-    Console.WriteLine("=" |> String.replicate 50)
+    // Interactive mode
+    Console.WriteLine(String.replicate 50 "=")
     Console.WriteLine("Interactive Mode - Enter expressions below:")
-    Console.WriteLine("=" |> String.replicate 50)
+    Console.WriteLine(String.replicate 50 "=")
     
-    let input:string = getInputString()
+    let input = getInputString()
     
     try
         let oList = lexer input
-        let sList = printTList oList
-        let pList = printTList (parser oList)
+        let _ = printTList oList
+        let _ = printTList (parser oList)
         let Out = parseNeval oList
         Console.WriteLine("Result = {0}", snd Out)
-        0  // Success exit code
+        0
     with
     | ex ->
         Console.ForegroundColor <- ConsoleColor.Red
         Console.WriteLine("Error: {0}", ex.Message)
         Console.ResetColor()
-        1  // Error exit code
-
+        1
 
 // Grammar in BNF:
 // <E>        ::= <T> <Eopt>
@@ -356,6 +442,4 @@ let main argv  =
 // <P>        ::= <U> <Popt>
 // <Popt>     ::= "^" <P> | <empty>
 // <U>        ::= "-" <U> | <NR>
-// <NR>       ::= "Num" <value> | "(" <E> ")"
-
-
+// <NR>       ::= "Num" <value> | <Func> "(" <E> ")" | "(" <E> ")"
