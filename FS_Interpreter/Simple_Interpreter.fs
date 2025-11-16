@@ -392,7 +392,7 @@ module public GUIInterpret =
             let (_, result) = parseNeval oList
             result.ToString()
         with
-        | ex -> $"Error: {ex.Message}"
+        | ex -> raise (System.Exception(ex.Message))
 
 // Entry point
 [<EntryPoint>]
