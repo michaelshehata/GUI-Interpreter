@@ -12,6 +12,10 @@ type terminal =
     | Add | Sub | Mul | Div | Mod | Pow
     | Lpar | Rpar 
     | Num of float
+    | Sin | Cos | Tan | Log | Exp
+    | Ident of string
+    | Assign
+    | Semicolon
 
 //Helper functions
 let str2lst s = [for c in s -> c]
@@ -187,6 +191,112 @@ let rec printTList (lst:list<terminal>) : list<string> =
     | [] -> Console.Write("EOL\n")
             []
 
+// Testing suite
+module Testing =
+    
+    type TestCase = {
+        Expression: string
+        Expected: float
+        Description: string
+    }
+    
+    type TestResult = {
+        Expression: string
+        Expected: float
+        Actual: float option
+        Passed: bool
+        ErrorMsg: string option
+        Description: string
+    }
+    
+    // Test cases 
+    let testCases = [
+        // Basic arithmetic
+        { Expression = "3 + 4 * 5"; Expected = 23.0; Description = "BODMAS test" }
+        { Expression = "(3 + 4) * 5"; Expected = 35.0; Description = "Parentheses priority" }
+        { Expression = "10 - 3 - 2"; Expected = 5.0; Description = "Left associativity (subtraction)" }
+        { Expression = "20 / 4 / 2"; Expected = 2.5; Description = "Left associativity (division)" }
+        
+        // Floats
+        { Expression = "3.14 + 2.5"; Expected = 5.64; Description = "Float addition" }
+        { Expression = "10.5 / 2"; Expected = 5.25; Description = "Float division" }
+        
+        // Modulo
+        { Expression = "10 % 3"; Expected = 1.0; Description = "Integer modulo" }
+        { Expression = "17.5 % 5"; Expected = 2.5; Description = "Float modulo" }
+        
+        // Power (right-associative!)
+        { Expression = "2^3"; Expected = 8.0; Description = "Simple power" }
+        { Expression = "2^3^2"; Expected = 512.0; Description = "Right associativity (power)" }
+        { Expression = "2^10"; Expected = 1024.0; Description = "Larger power" }
+        
+        // Unary minus
+        { Expression = "-5 + 3"; Expected = -2.0; Description = "Unary minus" }
+        { Expression = "-(3 + 4)"; Expected = -7.0; Description = "Unary minus with parentheses" }
+        { Expression = "--5"; Expected = 5.0; Description = "Double unary minus" }
+        { Expression = "---3"; Expected = -3.0; Description = "Triple unary minus" }
+        
+        // Complex expressions
+        { Expression = "2 + 3 * 4 - 5"; Expected = 9.0; Description = "Mixed operators" }
+        { Expression = "(2 + 3) * (4 - 1)"; Expected = 15.0; Description = "Multiple parentheses" }
+        { Expression = "10 / 2 + 3 * 4"; Expected = 17.0; Description = "Division and multiplication" }
+        
+        // Exponential notation (if implemented)
+        { Expression = "1.5E3"; Expected = 1500.0; Description = "Exponential notation (E)" }
+        { Expression = "2.5e-2"; Expected = 0.025; Description = "Exponential notation (e-)" }
+        { Expression = "1E+2"; Expected = 100.0; Description = "Exponential notation (E+)" }
+    ]
+    
+    let runTest (testCase: TestCase) : TestResult =
+        try
+            let tokens = lexer testCase.Expression
+            let (_, result) = parseNeval tokens
+            let passed = abs(result - testCase.Expected) < 0.0001 // Float comparison tolerance
+            {
+                Expression = testCase.Expression
+                Expected = testCase.Expected
+                Actual = Some result
+                Passed = passed
+                ErrorMsg = None
+                Description = testCase.Description
+            }
+        with
+        | ex ->
+            {
+                Expression = testCase.Expression
+                Expected = testCase.Expected
+                Actual = None
+                Passed = false
+                ErrorMsg = Some ex.Message
+                Description = testCase.Description
+            }
+    
+    let runAllTests() =
+        let results = testCases |> List.map runTest
+        let passed = results |> List.filter (fun r -> r.Passed) |> List.length
+        let failed = results |> List.filter (fun r -> not r.Passed) |> List.length
+        
+        printfn "\n========================================="
+        printfn "TEST RESULTS"
+        printfn "========================================="
+        printfn "Total: %d | Passed: %d | Failed: %d\n" (passed + failed) passed failed
+        
+        results |> List.iter (fun r ->
+            if r.Passed then
+                printfn "✓ PASS: %s" r.Description
+                printfn "  Expression: %s = %.4f" r.Expression r.Expected
+            else
+                printfn "✗ FAIL: %s" r.Description
+                printfn "  Expression: %s" r.Expression
+                printfn "  Expected: %.4f" r.Expected
+                match r.Actual with
+                | Some actual -> printfn "  Got: %.4f" actual
+                | None -> printfn "  Error: %s" (r.ErrorMsg |> Option.defaultValue "Unknown error")
+            printfn ""
+        )
+        
+        printfn "========================================="
+        (passed, failed)
 module public GUIInterpret =
 
 // Function to interpret input string and return result as string
@@ -200,14 +310,42 @@ module public GUIInterpret =
     
 [<EntryPoint>]
 let main argv  =
-    Console.WriteLine("Simple Interpreter")
+    Console.WriteLine("Simple Interpreter - Starting Tests...")
+    Console.WriteLine("=" |> String.replicate 50)
+    
+    // Run tests and get results
+    let (passed, failed) = Testing.runAllTests()
+    
+    // Provide clear feedback based on test results
+    if failed = 0 then
+        Console.ForegroundColor <- ConsoleColor.Green
+        Console.WriteLine("\nALL TESTS PASSED!\n")
+        Console.ResetColor()
+    else
+        Console.ForegroundColor <- ConsoleColor.Red
+        Console.WriteLine($"\nWARNING: {failed} test(s) FAILED.\n")
+        Console.ResetColor()
+    
+    // Continue to interactive mode
+    Console.WriteLine("=" |> String.replicate 50)
+    Console.WriteLine("Interactive Mode - Enter expressions below:")
+    Console.WriteLine("=" |> String.replicate 50)
+    
     let input:string = getInputString()
-    let oList = lexer input
-    let sList = printTList oList
-    let pList = printTList (parser oList)
-    let Out = parseNeval oList
-    Console.WriteLine("Result = {0}", snd Out)
-    0
+    
+    try
+        let oList = lexer input
+        let sList = printTList oList
+        let pList = printTList (parser oList)
+        let Out = parseNeval oList
+        Console.WriteLine("Result = {0}", snd Out)
+        0  // Success exit code
+    with
+    | ex ->
+        Console.ForegroundColor <- ConsoleColor.Red
+        Console.WriteLine("Error: {0}", ex.Message)
+        Console.ResetColor()
+        1  // Error exit code
 
 
 // Grammar in BNF:
@@ -221,33 +359,3 @@ let main argv  =
 // <NR>       ::= "Num" <value> | "(" <E> ")"
 
 
-//// TEST CASES ONLY FOR REFERENCE TO USE: CHECK INTERPRETER FUNCTIONALITY
-
-//// Basic arithmetic
-//3 + 4 * 5           // = 23 (BODMAS)
-//(3 + 4) * 5         // = 35
-
-//// Float support
-//3.14 + 2.5          // = 5.64
-//10.5 / 2            // = 5.25
-
-//// Modulo
-//10 % 3              // = 1
-//17.5 % 5            // = 2.5
-
-//// Power (right-associative!)
-//2^3                 // = 8
-//2^3^2               // = 2^(3^2) = 2^9 = 512 (NOT 64!)
-
-//// Unary minus
-//-5 + 3              // = -2
-//-(3 + 4)            // = -7
-//--5                 // = 5
-
-//// Exponential notation (optional)
-//1.5E3               // = 1500
-//2.5e-2              // = 0.025
-
-//// Error detection
-//10 / 0              // Error: Division by zero
-//5 % 0               // Error: Modulo by zero

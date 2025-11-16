@@ -92,3 +92,8 @@ C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\refint\CS
 C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\CS_GUI.pdb
 C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\CS_GUI.genruntimeconfig.cache
 C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\ref\CS_GUI.dll
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\bin\Debug\net9.0-windows\OxyPlot.dll
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\bin\Debug\net9.0-windows\OxyPlot.Wpf.dll
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\bin\Debug\net9.0-windows\OxyPlot.Wpf.Shared.dll
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\PlottingArea.g.cs
+C:\Users\micha\Desktop\GUI-Interpreter\CS_GUI\obj\Debug\net9.0-windows\PlottingArea.baml
