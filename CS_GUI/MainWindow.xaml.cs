@@ -85,5 +85,21 @@ namespace CS_GUI
                 errorBox.Text = ex.Message;
             }
         }
+        private void buttonParseTree_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = "";
+                parseTreeBox.Text = "";
+
+                string inputText = inputBox.Text;
+                string tree = Simple_Interpreter.GUIInterpret.getParseTreeString(inputText);
+                parseTreeBox.Text = tree;
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
     }
 }
