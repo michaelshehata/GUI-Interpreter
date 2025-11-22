@@ -11,8 +11,8 @@
     <Compile Include="AST.fs" />
     <Compile Include="SymbolTable.fs" />
     <Compile Include="Parser.fs" />
-    <Compile Include="Functions.fs" />
     <Compile Include="Evaluator.fs" />
+    <Compile Include="Functions.fs" />
     <Compile Include="API.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />

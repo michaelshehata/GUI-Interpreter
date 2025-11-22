@@ -1,7 +1,4 @@
 ﻿
-
-
-
 // Parse tree builder
 let parseExpTree tList =    
     let rec E tList = 
@@ -150,3 +147,26 @@ let getInputString() : string =
     Console.ReadLine()
 
 
+
+
+// CHANGE 1: Statement parser - handles both assignments and expressions
+let parseStatement tList = 
+    match tList with
+    | Ident name :: Assign :: tail ->
+        // This is an assignment: variable = expression
+        let (remaining, value) = parseNeval tail
+        symbolTable <- symbolTable.Add(name, value)
+        (remaining, value)
+    | _ -> 
+        // Regular expression (no assignment)
+        parseNeval tList
+
+// Function to print list of terminals (for debugging)
+let rec printTList (lst:list<terminal>) : list<string> = 
+    match lst with
+    | head::tail -> 
+        Console.Write("{0} ", head.ToString())
+        printTList tail
+    | [] -> 
+        Console.Write("EOL\n")
+        []

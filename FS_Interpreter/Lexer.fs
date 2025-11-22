@@ -83,7 +83,7 @@ let rec private scIdent(iStr, acc: string) =
     | _ -> (iStr, acc)
 
 // Check if a name is a recognized built-in function
-let private recognizeFunction (name: string) : terminal option =
+let private recognizeFunction (name: string) : Terminal option =
     match name.ToLower() with
     | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
     | "exp" | "log" | "ln" | "sqrt" | "abs" 

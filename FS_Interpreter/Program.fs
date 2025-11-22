@@ -6,20 +6,14 @@
 // Group 21 Advanced Programming
 // Michael Shehata, Ali Jamjoum, Luke Wilson
 
-// Entry point
-module Program
-
 open System
-open Lexer
-open Parser
-open Evaluator
-open Testing
 
 // Function to get input from console
-let getInputString() : string = 
+let getInputString () : string = 
     Console.Write("Enter an expression: ")
     Console.ReadLine()
 
+// Entry point
 [<EntryPoint>]
 let main argv =
     Console.WriteLine("Simple Interpreter - Starting Tests...")
@@ -46,9 +40,9 @@ let main argv =
     let input = getInputString()
     
     try
-        let oList = lexer input
-        let _ = printTList oList
-        let Out = parseStatement oList
+        let oList = Lexer.lexer input
+        let _ = API.printTList oList
+        let Out = Evaluator.parseStatement oList
         Console.WriteLine("Result = {0}", snd Out)
         0
     with
@@ -59,7 +53,6 @@ let main argv =
         1
 
 // Grammar in BNF:
-// CHANGE 3: Updated grammar to include statement rule
 // <Statement> ::= <Ident> "=" <E> | <E>
 // <E>        ::= <T> <Eopt>
 // <Eopt>     ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
