@@ -6,6 +6,9 @@
 // Group 21 Advanced Programming
 // Michael Shehata, Ali Jamjoum, Luke Wilson
 
+
+module public Program
+
 open System
 
 // Function to get input from console
@@ -20,7 +23,7 @@ let main argv =
     Console.WriteLine(String.replicate 50 "=")
     
     // Run automated tests
-    let (passed, failed) = Testing.runAllTests()
+    let (passed, failed) = Tests.runAllTests()
     
     // Provide feedback
     if failed = 0 then

@@ -1,4 +1,4 @@
-module API
+module public API
 
 open System
 open NumberSystem

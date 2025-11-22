@@ -1,4 +1,4 @@
-module Parser
+module public Parser
 
 open System
 open NumberSystem

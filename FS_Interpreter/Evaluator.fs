@@ -1,4 +1,4 @@
-module Evaluator
+module public Evaluator
 
 open System
 open NumberSystem

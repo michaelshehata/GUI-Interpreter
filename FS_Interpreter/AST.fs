@@ -1,4 +1,4 @@
-module AST
+module public AST
 
 open System.Text
 

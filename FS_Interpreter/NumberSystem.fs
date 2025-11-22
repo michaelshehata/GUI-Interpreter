@@ -1,4 +1,4 @@
-module NumberSystem
+module public NumberSystem
 
 open System
 

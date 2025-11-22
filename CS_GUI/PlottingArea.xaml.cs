@@ -36,8 +36,8 @@ namespace CS_GUI
 
             for (double x = xMin; x <= xMax; x += step)
             {
-
-                double y = Simple_Interpreter.GUIInterpret.evaluateExpression(function, x);
+                // CHANGED: Simple_Interpreter.GUIInterpret.evaluateExpression -> API.evaluateExpression
+                double y = API.evaluateExpression(function, x);
                 series.Points.Add(new DataPoint(x, y));
             }
 
@@ -45,6 +45,4 @@ namespace CS_GUI
             PlotViewControl.Model = model;
         }
     }
-
-
 }

@@ -1,4 +1,4 @@
-module Functions
+module public Functions
 
 open System
 open NumberSystem

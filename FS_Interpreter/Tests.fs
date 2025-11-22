@@ -1,4 +1,4 @@
-module Testing
+module public Tests
 
 open System
 

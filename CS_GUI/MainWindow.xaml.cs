@@ -46,7 +46,8 @@ namespace CS_GUI
                 outputBox.Text = ""; // clear output box text
 
                 string inputText = inputBox.Text;
-                string interpreterReturn = Simple_Interpreter.GUIInterpret.interpret(inputText);
+                // CHANGED: Simple_Interpreter.GUIInterpret.interpret -> API.interpret
+                string interpreterReturn = API.interpret(inputText);
                 outputBox.Text = interpreterReturn;
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
 
@@ -93,7 +94,8 @@ namespace CS_GUI
                 parseTreeBox.Text = "";
 
                 string inputText = inputBox.Text;
-                string tree = Simple_Interpreter.GUIInterpret.getParseTreeString(inputText);
+                // CHANGED: Simple_Interpreter.GUIInterpret.getParseTreeString -> API.getParseTreeString
+                string tree = API.getParseTreeString(inputText);
                 parseTreeBox.Text = tree;
             }
             catch (Exception ex)

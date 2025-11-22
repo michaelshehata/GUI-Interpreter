@@ -1,4 +1,4 @@
-module Lexer
+module public Lexer
 
 open System
 open NumberSystem
