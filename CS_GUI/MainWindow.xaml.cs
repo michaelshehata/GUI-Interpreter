@@ -10,6 +10,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using static API;  // or just: using API;
+
 namespace CS_GUI
 {
     /// <summary>
