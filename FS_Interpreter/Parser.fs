@@ -1,6 +1,54 @@
-﻿
+module Parser
 
+open System
+open NumberSystem
+open Lexer
+open AST
 
+// Exceptions
+let parseError = System.Exception("Parser error")
+
+// Parser function - validates syntax without evaluation
+let parser tList = 
+    let rec E tList = (T >> Eopt) tList
+    and Eopt tList = 
+        match tList with
+        | Add :: tail -> (T >> Eopt) tail
+        | Sub :: tail -> (T >> Eopt) tail
+        | _ -> tList
+    and T tList = (P >> Topt) tList
+    and Topt tList =
+        match tList with
+        | Mul :: tail -> (P >> Topt) tail
+        | Div :: tail -> (P >> Topt) tail
+        | Mod :: tail -> (P >> Topt) tail
+        | _ -> tList
+    and P tList = (U >> Popt) tList
+    and Popt tList =
+        match tList with
+        | Pow :: tail -> P tail
+        | _ -> tList
+    and U tList =
+        match tList with
+        | Sub :: tail -> U tail
+        | _ -> NR tList
+    and NR tList =
+        match tList with 
+        | Num value :: tail -> tail
+        | Ident name :: tail -> tail
+        | Func name :: Lpar :: tail -> 
+            match E tail with 
+            | Rpar :: tail -> tail
+            | _ -> raise parseError
+        | Lpar :: tail -> 
+            match E tail with 
+            | Rpar :: tail -> tail
+            | _ -> raise parseError
+        | _ -> raise parseError
+    let remaining = E tList
+    match remaining with
+    | [] -> []
+    | _ -> raise parseError
 
 // Parse tree builder
 let parseExpTree tList =    
@@ -68,7 +116,7 @@ let parseExpTree tList =
     and NR tList = 
         match tList with
         | Num value :: tail ->
-            (tail, Node("<NR>", [Leaf (string value)]))
+            (tail, Node("<NR>", [Leaf (NumberSystem.toString value)]))
         | Ident name :: tail ->
             (tail, Node("<NR>", [Leaf name]))
         | Func name :: Lpar :: tail ->
@@ -90,6 +138,7 @@ let parseExpTree tList =
     match remaining with
     | [] -> (remaining, tree)
     | _ -> raise  parseError
+
 let parseStatementTree tList = 
     match tList with
     | Ident name :: Assign :: tail ->
@@ -104,49 +153,3 @@ let parseStatementTree tList =
         | [] ->
             (remaining, Node("<statement>", [expTree]))
         | _ -> raise parseError
-
-open System.Text
-
-// New addition for turning tree into string
-let parseTreetoString (tree:ParseTree) : string = 
-    let sb = StringBuilder()
-    
-    let rec print indent t =
-        let ind = String.replicate indent " "
-        match t with
-        | Leaf  text ->
-            sb.AppendLine(sprintf "%s%s" ind text) |> ignore
-        | Node (label,children) ->
-            sb.AppendLine(sprintf "%s%s" ind label) |> ignore
-            children |> List.iter (print(indent + 1))
-    print 0 tree
-    sb.ToString()
-    
-// CHANGE 1: Statement parser - handles both assignments and expressions
-let parseStatement tList = 
-    match tList with
-    | Ident name :: Assign :: tail ->
-        // This is an assignment: variable = expression
-        let (remaining, value) = parseNeval tail
-        symbolTable <- symbolTable.Add(name, value)
-        (remaining, value)
-    | _ -> 
-        // Regular expression (no assignment)
-        parseNeval tList
-
-// Function to print list of terminals (for debugging)
-let rec printTList (lst:list<terminal>) : list<string> = 
-    match lst with
-    | head::tail -> 
-        Console.Write("{0} ", head.ToString())
-        printTList tail
-    | [] -> 
-        Console.Write("EOL\n")
-        []
-
-// Function to get input from console
-let getInputString() : string = 
-    Console.Write("Enter an expression: ")
-    Console.ReadLine()
-
-

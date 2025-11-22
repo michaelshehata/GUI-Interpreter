@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("FS_Interpreter")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+401a7eeb1f3f0d7b2c604351769001bbb9fbb257")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f4f467c6b225ef08eadf39fca7bf1fb3610ee226")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("FS_Interpreter")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("FS_Interpreter")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]

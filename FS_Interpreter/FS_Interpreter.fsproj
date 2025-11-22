@@ -5,8 +5,16 @@
 
     <WarnOn>3390;$(WarnOn)</WarnOn>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Include="Simple_Interpreter.fs" />
+    <Compile Include="NumberSystem.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="AST.fs" />
+    <Compile Include="SymbolTable.fs" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Functions.fs" />
+    <Compile Include="Evaluator.fs" />
+    <Compile Include="API.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>
