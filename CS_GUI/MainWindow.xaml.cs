@@ -45,12 +45,10 @@ namespace CS_GUI
             try
             {
                 errorBox.Text = ""; // clear error box text
-                outputBox.Text = ""; // clear output box text
 
                 string inputText = inputBox.Text;
                 // CHANGED: Simple_Interpreter.GUIInterpret.interpret -> API.interpret
                 string interpreterReturn = API.interpret(inputText);
-                outputBox.Text = interpreterReturn;
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
 
             }

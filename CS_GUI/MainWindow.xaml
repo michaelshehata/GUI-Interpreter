@@ -7,205 +7,204 @@
         xmlns:local="clr-namespace:CS_GUI"
         mc:Ignorable="d"
         Title="Math Evaluator" Height="478" Width="842">
-    <Grid>
-        <local:TopMenu/>
 
-        <Label Content="Math Evaluator"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <local:TopMenu Grid.Row="0"/>
+
+        <Label Grid.Row="1"
+               Content="Math Evaluator"
                FontSize="20"
                FontWeight="bold"
                Foreground="DeepPink"
                HorizontalAlignment="Left"
-               Margin="36,24,0,0"
-               VerticalAlignment="Top"/>
+               Margin="10,10,0,5"/>
 
-        <TextBox x:Name="inputBox" 
-                 HorizontalAlignment="Left" 
-                 Margin="41,82,0,0" 
-                 TextWrapping="Wrap" 
-                 Text="" 
-                 VerticalAlignment="Top"
-                 Width="300"
-                 IsReadOnly="False" />
+        <!-- Main content: Left (input + plot) | Right (history + parse tree) -->
+        <Grid Grid.Row="2" Margin="10,0,10,10">
+            <Grid.ColumnDefinitions>
+                <!-- Left: input/error + plot -->
+                <ColumnDefinition Width="3*"/>
+                <!-- Right: history + parse tree -->
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
 
-        <TextBox x:Name="outputBox"
-                 Margin="486,82,14,0"
-                 TextWrapping="Wrap"
-                 Text=""
-                 VerticalAlignment="Top"
-                 TextChanged="TextBox_TextChanged"
-                 IsReadOnly="True" />
+            <!-- Left Column -->
+            <Grid Grid.Column="0" Margin="0,0,10,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <TextBox x:Name="errorBox" 
-                 HorizontalAlignment="Left"
-                 Margin="41,123,0,0"
-                 TextWrapping="Wrap"
-                 Text=""
-                 VerticalAlignment="Top"
-                 Width="300"
-                 TextChanged="TextBox_TextChanged"
-                 IsReadOnly="True"
-                 Foreground="Red" />
+                <!-- Input -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,4">
+                    <Label Content="Input:"/>
+                    <TextBox x:Name="inputBox" 
+                             TextWrapping="Wrap" 
+                             Text=""
+                             IsReadOnly="False"
+                             MaxHeight="80"/>
+                </StackPanel>
 
-        <Button x:Name="buttonCalculate"
-                Content="Calculate"
-                HorizontalAlignment="Left"
-                Margin="349,81,0,0"
-                VerticalAlignment="Top"
-                Click="buttonCalculate_Click"/>
+                <!-- Error -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,4">
+                    <Label Content="Error:"/>
+                    <TextBox x:Name="errorBox" 
+                             TextWrapping="Wrap"
+                             Text=""
+                             IsReadOnly="True"
+                             Foreground="Red"
+                             MaxHeight="60"
+                             TextChanged="TextBox_TextChanged"/>
+                </StackPanel>
 
-        <Button x:Name="buttonPlot"
-            Content="Plot"
-            HorizontalAlignment="Left"
-            Margin="349,100,0,0"
-            VerticalAlignment="Top"
-            Click="buttonPlot_Click" Width="52"/>
-        <Button x:Name="buttonParseTree"
-            Content="Parse Tree"
-            HorizontalAlignment="Left"
-            Margin="349,119,0,0"
-            VerticalAlignment="Top"
-            Width="100"
-            Click="buttonParseTree_Click"
-            />
+                <!-- Calc/Plot/Parse Tree Buttons -->
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            Margin="0,4,0,8">
+                    <Button x:Name="buttonCalculate"
+                            Content="Calculate"
+                            Margin="0,0,8,0"
+                            Click="buttonCalculate_Click"/>
 
-        <Label Content="Input:"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="39,56,0,0"/>
+                    <Button x:Name="buttonPlot"
+                            Content="Plot"
+                            Width="52"
+                            Margin="0,0,8,0"
+                            Click="buttonPlot_Click"/>
 
-        <Label Content="Output:"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="484,56,0,0"/>
+                    <Button x:Name="buttonParseTree"
+                            Content="Parse Tree"
+                            Width="100"
+                            Click="buttonParseTree_Click"/>
+                </StackPanel>
 
-        <Label Content="Error:"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"
-               Margin="39,100,0,0"
-               RenderTransformOrigin="0.646,1.652"/>
+                <!-- Plot area (takes remaining vertical space on the left) -->
+                <local:PlottingArea x:Name="PlotArea"
+                                    Grid.Row="3"
+                                    Margin="0,0,0,10"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"/>
 
-        <Label Content="History:"
-       HorizontalAlignment="Left"
-       VerticalAlignment="Top"
-       Margin="484,100,0,0"
-       RenderTransformOrigin="0.646,1.652"/>
+                <!-- Numeric controls under the plot -->
+                <StackPanel Grid.Row="4"
+                            Orientation="Horizontal"
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
 
-        <!-- Right-hand area for history list + clear button -->
-        <Grid Margin="486,123,14,38">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="Auto" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
+                    <!-- Min X-->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+                        <TextBlock Text="Min X:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"
+                                   FontWeight="Bold"/>
+                        <xctk:DoubleUpDown x:Name="MinXDoubleUpDown"
+                                           Width="70"
+                                           Height="24"
+                                           Increment="0.1"
+                                           Value="1" />
+                    </StackPanel>
 
-            <ListBox x:Name="HistoryBox"
-             Grid.Row="0"
+                    <!-- Max X -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
+                        <TextBlock Text="Max X:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"
+                                   FontWeight="Bold"/>
+                        <xctk:DoubleUpDown x:Name="MaxXDoubleUpDown"
+                                           Width="70"
+                                           Height="24"
+                                           Increment="0.1"
+                                           Value="100" />
+                    </StackPanel>
+
+                    <!-- Step -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Step:"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"
+                                   FontWeight="Bold"/>
+                        <xctk:DoubleUpDown x:Name="StepDoubleUpDown"
+                                           Width="70"
+                                           Height="24"
+                                           Increment="0.1"
+                                           Value="1" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Right Column -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- History label -->
+                <Label Grid.Row="0"
+           Content="Output History:"/>
+
+                <!-- History list -->
+                <ListBox x:Name="HistoryBox"
+             Grid.Row="1"
              ItemsSource="{Binding History}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <TextBlock Text="{Binding Expression}"
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="{Binding Expression}"
                                FontSize="14"
                                Margin="0,0,10,0" />
 
-                            <TextBlock Text="="
+                                <TextBlock Text="="
                                FontSize="14"
                                FontWeight="Bold"
                                Margin="0,0,10,0" />
 
-                            <TextBlock Text="{Binding Result}"
+                                <TextBlock Text="{Binding Result}"
                                FontSize="14"
                                FontWeight="Bold" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-            <Button x:Name="ClearHistoryButton"
-            Grid.Row="1"
+                <!-- Clear history button -->
+                <Button x:Name="ClearHistoryButton"
+            Grid.Row="2"
             Content="Clear"
             HorizontalAlignment="Right"
-            Margin="0,8,0,0"
+            Margin="0,8,0,8"
             Width="60"
             Click="ClearHistoryButton_Click"/>
 
-            <TextBox x:Name="parseTreeBox"
-                Grid.Row="2"
-                Margin="0,10,0,0"
-                Text=""
-                IsReadOnly="True"
-                AcceptsReturn="True"
-                VerticalScrollBarVisibility="Auto"
-                HorizontalScrollBarVisibility="Auto"
-                FontFamily="Consolas"
-                TextWrapping="NoWrap" />
+                <!-- Parse Tree label -->
+                <Label Grid.Row="3"
+           Content="Parse Tree:"/>
+
+                <!-- Parse tree output box -->
+                <TextBox x:Name="parseTreeBox"
+             Grid.Row="4"
+             Margin="0,0,0,0"
+             Text=""
+             IsReadOnly="True"
+             AcceptsReturn="True"
+             VerticalScrollBarVisibility="Auto"
+             HorizontalScrollBarVisibility="Auto"
+             FontFamily="Consolas"
+             TextWrapping="NoWrap" />
+            </Grid>
         </Grid>
-
-
-        <!-- Left-hand plotting area + parameter controls -->
-        <Grid Margin="41,146,359,38">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <local:PlottingArea x:Name="PlotArea"
-                        Grid.Row="0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" />
-
-            <StackPanel Grid.Row="1"
-                Orientation="Horizontal"
-                Margin="0,10,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center">
-
-                <!-- Min X-->
-                <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
-                    <TextBlock Text="Min X:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,5,0"
-                       FontWeight="Bold"/>
-                    <xctk:DoubleUpDown x:Name="MinXDoubleUpDown" Width="70"
-                               Height="24"
-                               Increment="0.1"
-                               Value="1" />
-                </StackPanel>
-
-                <!-- Max X -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,20,0">
-                    <TextBlock Text="Max X:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,5,0"
-                       FontWeight="Bold"/>
-                    <xctk:DoubleUpDown x:Name="MaxXDoubleUpDown" Width="70"
-                               Height="24"
-                               Increment="0.1"
-                               Value="100" />
-                </StackPanel>
-
-                <!-- Step -->
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Step:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,5,0"
-                       FontWeight="Bold"/>
-                    <xctk:DoubleUpDown x:Name="StepDoubleUpDown" Width="70"
-                               Height="24"
-                               Increment="0.1"
-                               Value="1" />
-                </StackPanel>
-
-            </StackPanel>
-        </Grid>
-
-
-
-
-
-
-
-
-
     </Grid>
 </Window>
