@@ -40,9 +40,11 @@ namespace CS_GUI
             PlotViewControl.Model = _model;
         }
 
-        public void PlotFunction(string function, double xMin, double xMax, double step)
+        public void PlotFunction(IEnumerable<Tuple<double, double>> points,
+                               double xMin, double xMax)
         {
             _model.Series.Clear();
+
             var series = new LineSeries();
 
             if (Interpolation == InterpolationMode.Spline)
@@ -53,10 +55,11 @@ namespace CS_GUI
             double yMin = double.PositiveInfinity;
             double yMax = double.NegativeInfinity;
 
-            for (double x = xMin; x <= xMax; x += step)
+            foreach (var p in points)
             {
-                // call F# evaluation function          
-                double y = API.evaluateExpression(function, x);
+                double x = p.Item1;
+                double y = p.Item2;
+
                 series.Points.Add(new DataPoint(x, y));
 
                 if (y < yMin) yMin = y;
@@ -67,7 +70,7 @@ namespace CS_GUI
 
             _model.Axes.Clear();
 
-            // X axis: use the given min/max
+            // X axis
             var xAxis = new LinearAxis
             {
                 Position = AxisPosition.Bottom,
@@ -79,7 +82,7 @@ namespace CS_GUI
                 MinorGridlineThickness = 0.5,
             };
 
-            // If no valid points, fall back
+            // handle no-points / weird cases
             if (double.IsInfinity(yMin) || double.IsInfinity(yMax))
             {
                 yMin = -1;
@@ -89,7 +92,7 @@ namespace CS_GUI
             double yRange = yMax - yMin;
             if (yRange <= 0)
             {
-                yRange = 1; // flat line or single point
+                yRange = 1;
             }
 
             double padding = yRange * 0.1;
@@ -108,7 +111,9 @@ namespace CS_GUI
             _model.Axes.Add(xAxis);
             _model.Axes.Add(yAxis);
 
-            _model.InvalidatePlot(true); // refresh model
+            _model.InvalidatePlot(true);
         }
+
+
     }
-    }
+}

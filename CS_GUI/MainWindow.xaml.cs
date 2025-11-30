@@ -47,7 +47,7 @@ namespace CS_GUI
                 errorBox.Text = ""; // clear error box text
 
                 string inputText = inputBox.Text;
-                // CHANGED: Simple_Interpreter.GUIInterpret.interpret -> API.interpret
+                // send input text to interpreter
                 string interpreterReturn = API.interpret(inputText);
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
 
@@ -79,7 +79,15 @@ namespace CS_GUI
                 double minX = MinXDoubleUpDown.Value ?? 0;
                 double maxX = MaxXDoubleUpDown.Value ?? 0;
                 double step = StepDoubleUpDown.Value ?? 1;
-                PlotArea.PlotFunction(expr, minX, maxX, step);
+
+                // ask interpreter to compute points
+                API.plotFunction(expr, minX, maxX, step);
+
+                // read points from F# list
+                var points = API.getPlotPoints();
+
+                // hand points over to plotting area
+                PlotArea.PlotFunction(points, minX, maxX);
             }
             catch (Exception ex)
             {
@@ -94,7 +102,6 @@ namespace CS_GUI
                 parseTreeBox.Text = "";
 
                 string inputText = inputBox.Text;
-                // CHANGED: Simple_Interpreter.GUIInterpret.getParseTreeString -> API.getParseTreeString
                 string tree = API.getParseTreeString(inputText);
                 parseTreeBox.Text = tree;
             }
