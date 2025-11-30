@@ -6,7 +6,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CS_GUI"
         mc:Ignorable="d"
-        Title="Math Evaluator" Height="478" Width="842">
+        Title="Math Evaluator" Height="536" Width="1008">
 
     <Grid>
         <Grid.RowDefinitions>
