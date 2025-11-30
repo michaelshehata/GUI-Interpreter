@@ -136,23 +136,127 @@ let parseExpTree tList =
         | _ -> raise parseError
     
     let (remaining, tree) = E tList
-    match remaining with
-    | [] -> (remaining, tree)
-    | _ -> raise parseError
+    (remaining, tree)
+
 
 let parseStatementTree tList = 
-    match tList with
-    | Ident name :: Assign :: tail ->
-        let (remaining, expTree) = parseExpTree tail
-        match remaining with
-        | Semicolon :: rest ->
-            (rest, Node("<statement>", [Leaf name; Leaf "="; expTree; Leaf ";"]))
-        | [] ->
-            ([], Node("<statement>", [Leaf name; Leaf "="; expTree]))
-        | _ -> raise parseError
-    | _ ->
-        let (remaining, expTree) = parseExpTree tList
-        match remaining with
-        | [] ->
-            (remaining, Node("<statement>", [expTree]))
-        | _ -> raise parseError
+    
+    
+    let rec parseStatements tokens =
+        let rec collect acc toks  = 
+            match toks with
+            | [] ->
+                ([], List.rev acc)
+
+            | Semicolon :: rest ->
+                collect acc rest
+
+            | _ ->
+                let (remaining, stmtTree) = parseSingleStatement toks
+                match remaining with
+                | Semicolon :: rest ->
+                    collect (stmtTree :: acc) rest
+                | [] ->
+                    ([], List.rev (stmtTree :: acc))
+                | _ ->
+                    (remaining, List.rev (stmtTree :: acc))
+        collect [] tokens
+
+    and parseSingleStatement tokens =
+        match tokens with
+        | Ident name :: Assign :: tail -> 
+            let (remaining,expTree)= parseExpTree tail
+            let stmtNode =
+                Node("<statement>", [Leaf name; Leaf "=";expTree])
+            (remaining, stmtNode)
+
+        
+        | For :: Ident varName :: Assign :: tail ->
+            parseForLoop varName tail
+
+        
+        | _ ->
+            let (remaining,expTree) = parseExpTree tokens
+            let stmtNode = Node("<statement>" , [expTree])
+            (remaining, stmtNode)
+
+    
+    and parseForLoop varName tail =
+        
+        let (afterStart,startTree) = parseExpTree tail
+        match afterStart with
+        | To :: afterTo ->
+            
+            let (afterEnd, endTree) = parseExpTree afterTo
+
+            
+            let (stepTreeOpt, afterStepPart) =
+                match afterEnd with
+                | Step :: afterStep ->
+                    let (afterStepExpr , stepTree) = parseExpTree afterStep
+                    (Some stepTree, afterStepExpr)
+                | _ ->
+                    (None, afterEnd)
+
+            
+            match afterStepPart with
+            | Do :: bodyTokens ->
+                let (remaining, bodyTree) =parseLoopBody bodyTokens
+
+                let baseChildren =
+                    [
+                        Leaf "for"
+                        Leaf varName
+                        Leaf "="
+                        startTree
+                        Leaf "to"
+                        endTree
+                    ]
+
+                let baseChildren =
+                    match stepTreeOpt with
+                    | Some s -> baseChildren @ [Leaf "step"; s]
+                    | None -> baseChildren
+
+                let forNode =
+                    Node("<for-loop>", baseChildren @ [Leaf "do"; bodyTree; Leaf "end"])
+
+                (remaining, forNode)
+
+            | _ ->
+                raise parseError
+
+        | _ ->
+            raise parseError
+
+    
+    and parseLoopBody tokens =
+        let rec collect acc toks =
+            match toks with
+            | End :: rest ->
+                
+                (rest,Node("<body>", List.rev acc))
+
+            | [] ->
+                
+                raise parseError
+
+            | _ ->
+                let (remaining, stmtTree) = parseSingleStatement toks
+                match remaining with
+                | Semicolon :: rest ->
+                    collect (stmtTree :: acc) rest
+                | _ ->
+                    collect (stmtTree :: acc) remaining
+
+        collect [] tokens
+
+    
+    let (remaining, stmts) = parseStatements tList
+
+    let tree =
+        match stmts with                                   
+        | [single] -> single
+        | _  -> Node("<statements>", stmts)
+
+    (remaining,tree)

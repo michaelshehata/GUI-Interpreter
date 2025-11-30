@@ -1,40 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj": {}
+    "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj": {
+    "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj",
+        "projectUniqueName": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj",
         "projectName": "CS_GUI",
-        "projectPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj",
-        "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\CS_GUI\\obj\\",
+        "projectPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\CS_GUI\\CS_GUI.csproj",
+        "packagesPath": "C:\\Users\\Jamjo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\CS_GUI\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Jamjo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0-windows"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0-windows7.0": {
             "targetAlias": "net9.0-windows",
             "projectReferences": {
-              "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {
-                "projectPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj"
+              "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {
+                "projectPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj"
               }
             }
           }
@@ -83,34 +76,27 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "D:\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {
+    "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+        "projectUniqueName": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
         "projectName": "FS_Interpreter",
-        "projectPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
-        "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\obj\\",
+        "projectPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+        "packagesPath": "C:\\Users\\Jamjo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Jamjo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "C:\\Program Files\\dotnet\\sdk\\9.0.306\\FSharp\\library-packs": {},
+          "D:\\dotnet\\sdk\\9.0.306\\FSharp\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -153,7 +139,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "D:\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
