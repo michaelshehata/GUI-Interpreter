@@ -107,7 +107,7 @@ let private recognizeFunction (name: string) : Terminal option =
     | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
     | "exp" | "log" | "ln" | "sqrt" | "abs" 
     | "floor" | "ceil" | "round" 
-    | "plot" |"i" | "interpolation" -> Some (Func (name.ToLower())) 
+    | "plot" | "interpolation" -> Some (Func (name.ToLower())) 
     | _ -> None
 
 // Lexer function - converts input string to list of terminals
