@@ -37,8 +37,13 @@ let parser tList =
         | Num value :: tail -> tail
         | Ident name :: tail -> tail
         | Func name :: Lpar :: tail -> 
-            match E tail with 
-            | Rpar :: tail -> tail
+            let afterArg1 = E tail // Parse first argument
+            match afterArg1 with 
+            | Rpar :: tail -> tail // 1-argument function (e.g., sin(x))
+            | Comma :: afterComma -> // Two arguments (e.g., plot(x, y))
+                match E afterComma with // Parse second argument
+                | Rpar :: tail -> tail
+                | _ -> raise parseError
             | _ -> raise parseError
         | Lpar :: tail -> 
             match E tail with 
@@ -121,10 +126,16 @@ let parseExpTree tList =
         | Ident name :: tail ->
             (tail, Node("<NR>", [Leaf name]))
         | Func name :: Lpar :: tail ->
-            let (afterExp, eTree) = E tail
-            match afterExp with
+            let (afterArg1, arg1Tree) = E tail // Parse Arg1
+            match afterArg1 with
             | Rpar :: rest ->
-                (rest, Node("<NR>", [Leaf name; Leaf "("; eTree; Leaf ")"]))
+                (rest, Node("<NR>", [Leaf name; Leaf "("; arg1Tree; Leaf ")"])) // 1-arg func
+            | Comma :: afterComma -> // Check for second argument (plot)
+                let (afterArg2, arg2Tree) = E afterComma // Parse Arg2
+                match afterArg2 with
+                | Rpar :: rest ->
+                    (rest, Node("<NR>", [Leaf name; Leaf "("; arg1Tree; Leaf ","; arg2Tree; Leaf ")"])) // 2-arg func
+                | _ -> raise parseError
             | _ ->
                 raise parseError
         | Lpar :: tail ->

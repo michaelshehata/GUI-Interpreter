@@ -5,6 +5,7 @@ open NumberSystem
 open Lexer
 open SymbolTable
 open Parser
+open PlotBuffer
 
 // Exceptions
 let runtimeError = System.Exception("Runtime error")
@@ -56,8 +57,20 @@ let rec parseNeval tList =
             | None -> raise (System.Exception($"Variable '{name}' not defined"))
         | Func name :: Lpar :: tail ->
             let (afterExpr, argValue) = E tail
-            match afterExpr with
-            | Rpar :: rest ->
+            
+            // CHANGED: Handle plot(x,y) and standard functions
+            match name, afterExpr with
+            | "plot", Comma :: afterComma ->
+                let (afterArg2, arg2Value) = E afterComma
+                match afterArg2 with
+                | Rpar :: rest ->
+                    let x = NumberSystem.toFloat argValue
+                    let y = NumberSystem.toFloat arg2Value
+                    PlotBuffer.addPoint x y
+                    (rest, arg2Value)
+                | _ -> raise (System.Exception("Missing closing parenthesis for plot"))
+                
+            | _, Rpar :: rest ->
                 let result = 
                     let argFloat = NumberSystem.toFloat argValue
                     match name with
@@ -81,9 +94,19 @@ let rec parseNeval tList =
                     | "floor" -> Float (Math.Floor(argFloat))
                     | "ceil" -> Float (Math.Ceiling(argFloat))
                     | "round" -> Float (Math.Round(argFloat))
+                    // INT 3: Plotting controls
+                    | "interpolation" ->
+                        if argFloat >= 1.0 then 
+                            PlotBuffer.setInterpolation PlotBuffer.Spline
+                            Float 1.0
+                        else 
+                            PlotBuffer.setInterpolation PlotBuffer.Linear
+                            Float 0.0
+                    | "i" -> Complex(0.0, argFloat)
                     | _ -> raise (System.Exception($"Unknown function: {name}"))
                 (rest, result)
-            | _ -> raise (System.Exception($"Missing closing parenthesis for function '{name}'"))
+            | _ -> raise (System.Exception($"Missing closing parenthesis or invalid arguments for function '{name}'"))
+
         | Lpar :: tail -> 
             let (tLst, tval) = E tail
             match tLst with 
