@@ -103,5 +103,23 @@ namespace CS_GUI
                 errorBox.Text = ex.Message;
             }
         }
+
+        private void InterpolationCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded) return;
+
+            switch (InterpolationCombo.SelectedIndex)
+            {
+                case 0:
+                    PlotArea.Interpolation = PlottingArea.InterpolationMode.Linear;
+                    break;
+                case 1:
+                    PlotArea.Interpolation = PlottingArea.InterpolationMode.Spline;
+                    break;
+                default:
+                    PlotArea.Interpolation = PlottingArea.InterpolationMode.Linear;
+                    break;
+            }
+        }
     }
 }
