@@ -206,6 +206,30 @@ let power a b =
     match (a, b) with
     | Integer x, Integer y when y >= 0L ->
         Integer (pown x (int y))
+    | Complex (r, i), Integer y ->
+        // Integer power of complex number
+        let rec complexPower (r: float, i: float) (exp: int) =
+            if exp = 0 then (1.0, 0.0)
+            elif exp = 1 then (r, i)
+            elif exp < 0 then
+                // Negative power: (a+bi)^(-n) = 1 / (a+bi)^n
+                let (rPos, iPos) = complexPower (r, i) (-exp)
+                let denom = rPos * rPos + iPos * iPos
+                (rPos / denom, -iPos / denom)
+            else
+                let (r2, i2) = complexPower (r, i) (exp - 1)
+                (r * r2 - i * i2, r * i2 + i * r2)
+        let (realResult, imagResult) = complexPower (r, i) (int y)
+        simplifyNumber (Complex (realResult, imagResult))
+    | Complex (r, i), _ ->
+        // General complex power using: (a+bi)^c = e^(c*ln(a+bi))
+        // ln(a+bi) = ln(|a+bi|) + i*arg(a+bi)
+        let magnitude = sqrt(r * r + i * i)
+        let angle = atan2 i r
+        let expVal = toFloat b
+        let newMagnitude = magnitude ** expVal
+        let newAngle = angle * expVal
+        simplifyNumber (Complex (newMagnitude * cos(newAngle), newMagnitude * sin(newAngle)))
     | _ ->
         let fa = toFloat a
         let fb = toFloat b

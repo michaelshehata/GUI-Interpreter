@@ -45,6 +45,7 @@ let parser tList =
             | Rpar :: tail -> tail
             | _ -> raise parseError
         | _ -> raise parseError
+    
     let remaining = E tList
     match remaining with
     | [] -> []
@@ -137,15 +138,17 @@ let parseExpTree tList =
     let (remaining, tree) = E tList
     match remaining with
     | [] -> (remaining, tree)
-    | _ -> raise  parseError
+    | _ -> raise parseError
 
 let parseStatementTree tList = 
     match tList with
     | Ident name :: Assign :: tail ->
         let (remaining, expTree) = parseExpTree tail
         match remaining with
+        | Semicolon :: rest ->
+            (rest, Node("<statement>", [Leaf name; Leaf "="; expTree; Leaf ";"]))
         | [] ->
-            (remaining, Node("<statement>", [Leaf name; Leaf "="; expTree]))
+            ([], Node("<statement>", [Leaf name; Leaf "="; expTree]))
         | _ -> raise parseError
     | _ ->
         let (remaining, expTree) = parseExpTree tList

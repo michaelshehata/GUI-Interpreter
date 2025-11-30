@@ -55,13 +55,16 @@ let main argv =
         Console.ResetColor()
         1
 
-// Grammar in BNF:
-// <Statement> ::= <Ident> "=" <E> | <E>
-// <E>        ::= <T> <Eopt>
-// <Eopt>     ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
-// <T>        ::= <P> <Topt>
-// <Topt>     ::= "*" <P> <Topt> | "/" <P> <Topt> | "%" <P> <Topt> | <empty>
-// <P>        ::= <U> <Popt>
-// <Popt>     ::= "^" <P> | <empty>
-// <U>        ::= "-" <U> | <NR>
-// <NR>       ::= "Num" <value> | "Ident" <name> | <Func> "(" <E> ")" | "(" <E> ")"
+// Grammar in BNF: (updated for loops)
+// <Statement>     ::= <Assignment> | <ForLoop> | <E>
+// <Assignment>    ::= <Ident> "=" <E> ";"?
+// <ForLoop>       ::= "for" <Ident> "=" <E> "to" <E> ("step" <E>)? "do" <Body> "end"
+// <Body>          ::= <Statement>*
+// <E>             ::= <T> <Eopt>
+// <Eopt>          ::= "+" <T> <Eopt> | "-" <T> <Eopt> | <empty>
+// <T>             ::= <P> <Topt>
+// <Topt>          ::= "*" <P> <Topt> | "/" <P> <Topt> | "%" <P> <Topt> | <empty>
+// <P>             ::= <U> <Popt>
+// <Popt>          ::= "^" <P> | <empty>
+// <U>             ::= "-" <U> | <NR>
+// <NR>            ::= <Num> | <Ident> | <Func> "(" <E> ")" | "(" <E> ")"

@@ -4,12 +4,13 @@ open System
 open NumberSystem
 open Lexer
 open SymbolTable
+open Parser
 
 // Exceptions
 let runtimeError = System.Exception("Runtime error")
 
 // Parser and evaluator function - parses and computes result
-let parseNeval tList = 
+let rec parseNeval tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt (tList, value) = 
         match tList with
@@ -69,8 +70,8 @@ let parseNeval tList =
                     | "atan" -> Float (Math.Atan(argFloat))
                     // Exponential and logarithmic
                     | "exp" -> Float (Math.Exp(argFloat))
-                    | "log" -> Float (Math.Log10(argFloat))  // Base 10
-                    | "ln" -> Float (Math.Log(argFloat))     // Natural logarithm
+                    | "log" -> Float (Math.Log10(argFloat))
+                    | "ln" -> Float (Math.Log(argFloat))
                     // Utility functions
                     | "sqrt" -> 
                         if argFloat < 0.0 then 
@@ -82,27 +83,123 @@ let parseNeval tList =
                     | "round" -> Float (Math.Round(argFloat))
                     | _ -> raise (System.Exception($"Unknown function: {name}"))
                 (rest, result)
-            | _ -> raise runtimeError
+            | _ -> raise (System.Exception($"Missing closing parenthesis for function '{name}'"))
         | Lpar :: tail -> 
             let (tLst, tval) = E tail
             match tLst with 
             | Rpar :: tail -> (tail, tval)
-            | _ -> raise runtimeError
-        | _ -> raise runtimeError
+            | _ -> raise (System.Exception("Missing closing parenthesis"))
+        | [] -> 
+            raise (System.Exception("Unexpected end of expression"))
+        | Assign :: _ ->
+            raise (System.Exception("Unexpected '='. Assignment requires: variable = expression"))
+        | token :: _ -> 
+            raise (System.Exception($"Unexpected token: {token}. Expected number, variable, or function"))
     
     let (remaining, result) = E tList
-    match remaining with
-    | [] -> (remaining, result)
-    | _ -> raise runtimeError
+    (remaining, result)
 
-// Statement parser - handles both assignments and expressions
-let parseStatement tList = 
+// Statement parser - handles assignments, for loops, and expressions
+// Must use 'and' to make it mutually recursive with executeForLoop
+and parseStatement tList = 
     match tList with
+    | [] -> ([], Integer 0L)
+    
+    // Variable assignment: x = 10;
     | Ident name :: Assign :: tail ->
-        // This is an assignment: variable = expression
         let (remaining, value) = parseNeval tail
         SymbolTable.current <- SymbolTable.add name value SymbolTable.current
-        (remaining, value)
+        
+        match remaining with
+        | Semicolon :: rest -> 
+            if List.isEmpty rest then
+                ([], value)  // End of input
+            else
+                parseStatement rest  // Continue processing
+        | [] -> ([], value)
+        | _ -> raise Parser.parseError
+    
+    // For loop: for x = 1 to 5 do ... end
+    | For :: Ident varName :: Assign :: tail ->
+        // Parse start value
+        let (afterStart, startVal) = parseNeval tail
+        
+        match afterStart with
+        | To :: afterTo ->
+            // Parse end value
+            let (afterEnd, endVal) = parseNeval afterTo
+            
+            // Check for optional step and extract body start
+            let (stepVal, bodyTokens) = 
+                match afterEnd with
+                | Step :: afterStepKeyword ->
+                    let (afterStepVal, stepNum) = parseNeval afterStepKeyword
+                    match afterStepVal with
+                    | Do :: rest -> (Some stepNum, rest)
+                    | _ -> raise (System.Exception("Expected 'do' after step value"))
+                | Do :: rest -> 
+                    (None, rest)
+                | _ -> 
+                    raise (System.Exception("Expected 'step' or 'do' in for loop"))
+            
+            // Find the matching 'end'
+            let rec findEnd tokens acc depth =
+                match tokens with
+                | [] -> raise (System.Exception("Missing 'end' for 'for' loop"))
+                | End :: rest when depth = 0 -> (List.rev acc, rest)
+                | For :: rest -> findEnd rest (For :: acc) (depth + 1)
+                | End :: rest -> findEnd rest (End :: acc) (depth - 1)
+                | token :: rest -> findEnd rest (token :: acc) depth
+            
+            let (body, remaining) = findEnd bodyTokens [] 0
+            
+            // Execute the for loop
+            let loopResult = executeForLoop varName startVal endVal stepVal body
+            
+            // Check what comes after the loop
+            if List.isEmpty remaining then
+                ([], loopResult)
+            else
+                // Continue processing remaining tokens
+                parseStatement remaining
+        | _ -> raise (System.Exception("Expected 'to' in for loop"))
+    
+    // Regular expression
     | _ -> 
-        // Regular expression (no assignment)
-        parseNeval tList
+        let (remaining, result) = parseNeval tList
+        if List.isEmpty remaining then
+            ([], result)
+        else if remaining.Head = Semicolon && remaining.Tail <> [] then
+            // Skip semicolon and continue
+            parseStatement remaining.Tail
+        else if remaining.Head = Semicolon && remaining.Tail = [] then
+            ([], result)
+        else
+            (remaining, result)
+
+// Loop execution - uses 'and' for mutual recursion with parseStatement
+and executeForLoop (varName: string) (startVal: Number) (endVal: Number) (stepVal: Number option) (body: Terminal list) =
+    let step = match stepVal with
+               | Some s -> NumberSystem.toFloat s
+               | None -> 1.0
+    
+    let startFloat = NumberSystem.toFloat startVal
+    let endFloat = NumberSystem.toFloat endVal
+    
+    let mutable current = startFloat
+    let mutable lastResult = Integer 0L
+    
+    // Execute loop
+    while (if step > 0.0 then current <= endFloat else current >= endFloat) do
+        // Set loop variable in symbol table
+        SymbolTable.current <- SymbolTable.add varName (Float current) SymbolTable.current
+        
+        // Execute body - handle all statements in the body
+        if not (List.isEmpty body) then
+            let (_, result) = parseStatement body
+            lastResult <- result
+        
+        // Increment
+        current <- current + step
+    
+    lastResult
