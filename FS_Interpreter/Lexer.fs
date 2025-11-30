@@ -11,6 +11,15 @@ type Terminal =
     | Ident of string
     | Assign
     | Semicolon
+    // INT 3 LOOPS
+    | For
+    | To
+    | Step
+    | Do
+    | End
+    | LBrace
+    | RBrace
+
 
 // Helper functions
 let private str2lst s = [for c in s -> c]
@@ -66,13 +75,20 @@ let private scNum(iStr) =
             | _ -> (afterInt, 0.0)
         let (afterExp, expVal) = scExponent(afterFrac)
         let mantissa = intPart + fracPart
-        let result = mantissa * (10.0 ** expVal)  // Calculate result
-        let number = 
-            if fracPart = 0.0 && expVal = 0.0 then
-                Integer (int64 result)  // Pure integer
-            else
-                Float result            // Float or exponential
-        (afterExp, number)  // Return tuple
+        let result = mantissa * (10.0 ** expVal)
+        
+        // NEW: Check for 'i' 
+        match afterExp with
+        | 'i' :: rest ->
+            // imaginary: 3i = 0+3i
+            (rest, Complex(0.0, result))
+        | _ ->
+            let number = 
+                if fracPart = 0.0 && expVal = 0.0 then
+                    Integer (int64 result)
+                else
+                    Float result
+            (afterExp, number)
     | _ -> raise lexError
 
 // Scan an identifier or function name
@@ -85,6 +101,8 @@ let rec private scIdent(iStr, acc: string) =
 // Check if a name is a recognized built-in function
 let private recognizeFunction (name: string) : Terminal option =
     match name.ToLower() with
+    | "for" -> Some For | "to" -> Some To | "step" -> Some Step
+    | "do" -> Some Do | "end" -> Some End
     | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
     | "exp" | "log" | "ln" | "sqrt" | "abs" 
     | "floor" | "ceil" | "round" -> Some (Func (name.ToLower()))
@@ -103,6 +121,8 @@ let lexer input =
         | '^'::tail -> Pow :: scan tail
         | '('::tail -> Lpar :: scan tail
         | ')'::tail -> Rpar :: scan tail
+        | '{'::tail -> LBrace :: scan tail
+        | '}'::tail -> RBrace :: scan tail
         | '='::tail -> Assign :: scan tail
         | ';'::tail -> Semicolon :: scan tail
         | c :: tail when isblank c -> scan tail
