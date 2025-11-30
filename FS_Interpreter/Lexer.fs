@@ -19,6 +19,7 @@ type Terminal =
     | End
     | LBrace
     | RBrace
+    | Comma
 
 
 // Helper functions
@@ -105,7 +106,8 @@ let private recognizeFunction (name: string) : Terminal option =
     | "do" -> Some Do | "end" -> Some End
     | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
     | "exp" | "log" | "ln" | "sqrt" | "abs" 
-    | "floor" | "ceil" | "round" -> Some (Func (name.ToLower()))
+    | "floor" | "ceil" | "round" 
+    | "plot" |"i" | "interpolation" -> Some (Func (name.ToLower())) 
     | _ -> None
 
 // Lexer function - converts input string to list of terminals
@@ -125,6 +127,7 @@ let lexer input =
         | '}'::tail -> RBrace :: scan tail
         | '='::tail -> Assign :: scan tail
         | ';'::tail -> Semicolon :: scan tail
+        | ','::tail -> Comma :: scan tail
         | c :: tail when isblank c -> scan tail
         | c :: tail when isdigit c -> 
             let (remaining, numVal) = scNum(input)

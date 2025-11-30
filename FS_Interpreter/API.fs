@@ -7,6 +7,7 @@ open Parser
 open Evaluator
 open SymbolTable
 open AST
+open PlotBuffer
 
 // Function to print list of terminals (for debugging)
 let rec printTList (lst: Terminal list) : unit = 
@@ -72,6 +73,33 @@ let validateSyntax (input: string) : bool =
         true
     with
     | ex -> raise (System.Exception($"Syntax error: {ex.Message}"))
+
+// PLOTS FOR INT3
+// Get plot points
+let getPlotPoints () : (float * float) list =
+    PlotBuffer.getPoints() 
+    |> List.map (fun p -> (p.X, p.Y))
+
+// Clear plot points
+let clearPlotPoints () : unit =
+    PlotBuffer.clear()
+
+// Execute and plot a function
+let plotFunction (expression: string) (xMin: float) (xMax: float) (step: float) : unit =
+    PlotBuffer.clear()
+    
+    let mutable x = xMin
+    while x <= xMax do
+        try
+            SymbolTable.current <- SymbolTable.add "x" (Float x) SymbolTable.current
+            let tokens = lexer expression
+            let (_, result) = parseNeval tokens
+            let y = NumberSystem.toFloat result
+            PlotBuffer.addPoint x y
+        with
+        | ex -> () // Skip points that cause errors
+        
+        x <- x + step
 
 // Get function help text
 let getFunctionHelp () : string =
