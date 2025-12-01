@@ -56,9 +56,14 @@ namespace CS_GUI
                 var points = API.getPlotPoints();
                 if (points.Any())
                 {
+                    int interpMode = API.getInterpolationMode();
+                    PlotArea.Interpolation = interpMode == 0
+                        ? PlottingArea.InterpolationMode.Linear
+                        : PlottingArea.InterpolationMode.Spline;
+
                     double minX = points.Min(p => p.Item1);
                     double maxX = points.Max(p => p.Item1);
-                PlotArea.PlotFunction(points, minX, maxX);
+                    PlotArea.PlotFunction(points, minX, maxX);
                 }
     
 

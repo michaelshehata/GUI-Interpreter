@@ -100,6 +100,10 @@ let plotFunction (expression: string) (xMin: float) (xMax: float) (step: float) 
         | ex -> () // Skip points that cause errors
         
         x <- x + step
+let getInterpolationMode () : int =
+    match PlotBuffer.getInterpolation() with
+    | PlotBuffer.Linear -> 0
+    | PlotBuffer.Spline -> 1
 
 // Get function help text
 let getFunctionHelp () : string =
