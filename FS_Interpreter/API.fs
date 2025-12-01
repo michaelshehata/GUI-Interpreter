@@ -41,7 +41,101 @@ let evaluateExpression (expression: string, xValue: float) : float =
     with
     | ex -> raise (System.Exception($"Error evaluating expression: {ex.Message}"))
 
+let differentiateNumeric (expression: string) (x0: float) (stepSize: float) : float =
+    if stepSize <= 0.0 then
+        raise (System.Exception("Step size must be positive for differentiation."))
+    try
+        let leftValue = evaluateExpression(expression, x0 - stepSize)
+        let rightValue = evaluateExpression(expression, x0 + stepSize)
+        (rightValue - leftValue) / (2.0 * stepSize)
+    with
+    | ex -> raise (System.Exception($"Error computing derivative: {ex.Message}"))
+
+/// trapezium rule to approximate definite integral of f(x) from a to b
+let integrateTrapezoidal (expression: string) (a: float) (b: float) (steps: int) : float =
+    if steps <= 0 then
+        raise (System.Exception("Number of steps must be positive for integration."))
+    if a = b then 0.0
+    else
+        try
+            // Interval swapped or not?
+            let mutable startX = a
+            let mutable endX = b
+            let swapped =
+                if startX > endX then
+                    let tmp = startX
+                    startX <- endX
+                    endX <- tmp
+                    true
+                else
+                    false
+
+            let h = (endX - startX) / float steps
+
+            
+            let fStart = evaluateExpression(expression, startX)
+            let fEnd = evaluateExpression(expression, endX)
+
+            // Interior points
+            let mutable sum = 0.0
+            for i = 1 to steps - 1 do
+                let x = startX + float i * h
+                sum <- sum + evaluateExpression(expression, x)
+
+            let area = h * ((fStart + fEnd) / 2.0 + sum)
+            if swapped then -area else area
+        with
+        | ex -> raise (System.Exception($"Error computing integral: {ex.Message}"))
+
+// Bisection root finder for f(x) on [a, b]
+let findRootBisection (expression: string) (a: float) (b: float) (tolerance: float) (maxIterations: int) : float =
+    if maxIterations <= 0 then
+        raise (System.Exception("maxIterations must be positive for root finding."))
+    if tolerance <= 0.0 then
+        raise (System.Exception("Tolerance must be positive for root finding."))
+
+    try
+        let mutable left = a
+        let mutable right = b
+        let mutable fLeft = evaluateExpression(expression, left)
+        let mutable fRight = evaluateExpression(expression, right)
+
+        // need a sign change to use bisection
+        if fLeft * fRight > 0.0 then
+            raise (System.Exception("Bisection method requires f(a) and f(b) to have opposite signs."))
+
+        let mutable root = (left + right) / 2.0
+
+        let mutable i = 0
+        while i < maxIterations && (right - left) / 2.0 > tolerance do
+            root <- (left + right) / 2.0
+            let fMid = evaluateExpression(expression, root)
+
+            if abs fMid < tolerance then
+                // if its close enough well collaps the interval
+                left <- root
+                right <- root
+            elif fLeft * fMid < 0.0 then
+                // root lives in [left, root]
+                right <- root
+                fRight <- fMid
+            else
+                // root lives in [root, right]
+                left <- root
+                fLeft <- fMid
+
+            i <- i + 1
+
+        root
+    with
+    | ex -> raise (System.Exception($"Error finding root: {ex.Message}"))
+
+
+
+
+
 // Get parse tree as string
+
 let getParseTreeString (input: string) : string =
     try
         let tokens = lexer input

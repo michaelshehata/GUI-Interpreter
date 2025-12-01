@@ -108,33 +108,25 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\micha\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Jamjo\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+      "projectUniqueName": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
       "projectName": "FS_Interpreter",
-      "projectPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
-      "packagesPath": "C:\\Users\\micha\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\obj\\",
+      "projectPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+      "packagesPath": "C:\\Users\\Jamjo\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\micha\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Jamjo\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
-        "C:\\Program Files\\dotnet\\sdk\\9.0.306\\FSharp\\library-packs": {},
+        "D:\\dotnet\\sdk\\9.0.306\\FSharp\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -177,7 +169,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "D:\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

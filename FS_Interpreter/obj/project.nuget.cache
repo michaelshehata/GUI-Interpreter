@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "Eswq9RSZeSs=",
+  "dgSpecHash": "N/OI13gmu6s=",
   "success": true,
-  "projectFilePath": "C:\\Users\\micha\\Desktop\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
+  "projectFilePath": "C:\\Users\\Jamjo\\Documents\\GitHub\\GUI-Interpreter\\FS_Interpreter\\FS_Interpreter.fsproj",
   "expectedPackageFiles": [
-    "C:\\Users\\micha\\.nuget\\packages\\fsharp.core\\9.0.303\\fsharp.core.9.0.303.nupkg.sha512"
+    "C:\\Users\\Jamjo\\.nuget\\packages\\fsharp.core\\9.0.303\\fsharp.core.9.0.303.nupkg.sha512"
   ],
   "logs": []
 }
