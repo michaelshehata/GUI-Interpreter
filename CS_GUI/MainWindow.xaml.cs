@@ -47,9 +47,20 @@ namespace CS_GUI
                 errorBox.Text = ""; // clear error box text
 
                 string inputText = inputBox.Text;
+                // change
+                API.clearPlotPoints();
                 // send input text to interpreter
                 string interpreterReturn = API.interpret(inputText);
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
+                // change
+                var points = API.getPlotPoints();
+                if (points.Any())
+                {
+                    double minX = points.Min(p => p.Item1);
+                    double maxX = points.Max(p => p.Item1);
+                PlotArea.PlotFunction(points, minX, maxX);
+                }
+    
 
             }
             catch (Exception ex)
