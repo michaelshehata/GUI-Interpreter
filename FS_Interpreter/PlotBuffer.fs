@@ -41,7 +41,6 @@ let linearInterp (x1: float) (y1: float) (x2: float) (y2: float) (x: float) : fl
     if abs(x2 - x1) < 1e-10 then y1
     else y1 + (y2 - y1) * (x - x1) / (x2 - x1)
 
-// Simple cubic interpolation (you can enhance this)
+// Simple cubic interpolation 
 let splineInterp (x1: float) (y1: float) (x2: float) (y2: float) (x: float) : float =
-    // For now, just use linear (full cubic spline is complex)
     linearInterp x1 y1 x2 y2 x

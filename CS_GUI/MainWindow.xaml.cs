@@ -47,9 +47,25 @@ namespace CS_GUI
                 errorBox.Text = ""; // clear error box text
 
                 string inputText = inputBox.Text;
+                // change
+                API.clearPlotPoints();
                 // send input text to interpreter
                 string interpreterReturn = API.interpret(inputText);
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
+                // change
+                var points = API.getPlotPoints();
+                if (points.Any())
+                {
+                    int interpMode = API.getInterpolationMode();
+                    PlotArea.Interpolation = interpMode == 0
+                        ? PlottingArea.InterpolationMode.Linear
+                        : PlottingArea.InterpolationMode.Spline;
+
+                    double minX = points.Min(p => p.Item1);
+                    double maxX = points.Max(p => p.Item1);
+                    PlotArea.PlotFunction(points, minX, maxX);
+                }
+    
 
             }
             catch (Exception ex)
@@ -88,6 +104,79 @@ namespace CS_GUI
 
                 // hand points over to plotting area
                 PlotArea.PlotFunction(points, minX, maxX);
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
+        private string GetCurrentExpression()
+        {
+            // Reuse the same logic as plotting
+            string text = inputBox.Text;
+            return text.Contains("=")
+                ? text.Split('=')[1].Trim()
+                : text.Trim();
+        }
+
+        private void buttonDerivative_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = string.Empty;
+
+                string expr = GetCurrentExpression();
+                double x0 = DerivativeX0UpDown.Value ?? 0.0;
+                double stepSize = 1e-5; // fixed?
+
+                double value = API.differentiateNumeric(expr, x0, stepSize);
+
+                AddToHistory($"f'({x0}) for {expr}", value.ToString());
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
+
+        private void buttonRoot_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = string.Empty;
+
+                string expr = GetCurrentExpression();
+                double a = RootAUpDown.Value ?? 0.0;
+                double b = RootBUpDown.Value ?? 0.0;
+
+                double tolerance = 1e-6;
+                int maxIterations = 100;
+
+                double root = API.findRootBisection(expr, a, b, tolerance, maxIterations);
+
+                AddToHistory($"Root in [{a}, {b}] for {expr}", root.ToString());
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
+
+        private void buttonIntegrate_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = string.Empty;
+
+                string expr = GetCurrentExpression();
+                double a = IntegralAUpDown.Value ?? 0.0;
+                double b = IntegralBUpDown.Value ?? 0.0;
+
+                int steps = 1000; // fixed resolution (might change)
+
+                double area = API.integrateTrapezoidal(expr, a, b, steps);
+
+                AddToHistory($"∫[{a}, {b}] {expr} dx", area.ToString());
             }
             catch (Exception ex)
             {
