@@ -132,8 +132,7 @@ let runTest (testCase: TestCase) : TestResult =
         }
 
 let runAllTests () =
-    printfn "BASIC TESTS (INT1 & INT2)"
-    printfn "========================================="
+
     
     let basicResults = testCases |> List.map runTest
     let basicPassed = basicResults |> List.filter (fun r -> r.Passed) |> List.length
@@ -141,9 +140,9 @@ let runAllTests () =
     
     basicResults |> List.iter (fun r ->
         if r.Passed then
-            printfn "✓ PASS: %s" r.Description
+            printfn "Pass %s" r.Description
         else
-            printfn "✗ FAIL: %s" r.Description
+            printfn "Fail  %s" r.Description
             printfn "  Expression: %s" r.Expression
             printfn "  Expected: %.4f" r.Expected
             match r.Actual with
@@ -151,12 +150,12 @@ let runAllTests () =
             | None -> printfn "  Error: %s" (r.ErrorMsg |> Option.defaultValue "Unknown error")
     )
     
-    printfn "\n========================================="
+
     printfn "Basic Tests: %d passed, %d failed\n" basicPassed basicFailed
     
     // For loop tests
     printfn "FOR LOOP TESTS (INT3)"
-    printfn "========================================="
+
     
     let loopResults = forLoopTestCases |> List.map runTest
     let loopPassed = loopResults |> List.filter (fun r -> r.Passed) |> List.length
@@ -164,9 +163,9 @@ let runAllTests () =
     
     loopResults |> List.iter (fun r ->
         if r.Passed then
-            printfn "✓ PASS: %s" r.Description
+            printfn "Pass %s" r.Description
         else
-            printfn "✗ FAIL: %s" r.Description
+            printfn "Fail  %s" r.Description
             printfn "  Expression: %s" r.Expression
             printfn "  Expected: %.4f" r.Expected
             match r.Actual with
@@ -174,14 +173,12 @@ let runAllTests () =
             | None -> printfn "  Error: %s" (r.ErrorMsg |> Option.defaultValue "Unknown error")
     )
     
-    printfn "\n========================================="
-    printfn "For Loop Tests: %d passed, %d failed\n" loopPassed loopFailed
+
     
     let totalPassed = basicPassed + loopPassed
     let totalFailed = basicFailed + loopFailed
     
-    printfn "========================================="
     printfn "TOTAL: %d passed, %d failed" totalPassed totalFailed
-    printfn "========================================="
+
     
     (totalPassed, totalFailed)

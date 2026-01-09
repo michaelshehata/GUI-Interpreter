@@ -105,7 +105,6 @@ let plotFunction (expression: string) (xMin: float) (xMax: float) (step: float) 
 let getFunctionHelp () : string =
     """
 Available Built-in Functions:
-=============================
 
 Trigonometric (radians):
   sin(x), cos(x), tan(x)
@@ -134,7 +133,7 @@ Examples:
 let getSyntaxHelp () : string =
     """
 Syntax Guide:
-=============
+
 
 Operators (BODMAS order):
   ^   - Power (right associative)

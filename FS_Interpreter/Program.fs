@@ -19,8 +19,7 @@ let getInputString () : string =
 // Entry point
 [<EntryPoint>]
 let main argv =
-    Console.WriteLine("Simple Interpreter - Starting Tests...")
-    Console.WriteLine(String.replicate 50 "=")
+    Console.WriteLine("Interpreter Starting")
     
     // Run automated tests
     let (passed, failed) = Tests.runAllTests()
@@ -28,17 +27,17 @@ let main argv =
     // Provide feedback
     if failed = 0 then
         Console.ForegroundColor <- ConsoleColor.Green
-        Console.WriteLine("\n✓ ALL TESTS PASSED!\n")
+        Console.WriteLine("\n ALL TESTS PASSED\n")
         Console.ResetColor()
     else
         Console.ForegroundColor <- ConsoleColor.Red
-        Console.WriteLine($"\n✗ WARNING: {failed} test(s) FAILED.\n")
+        Console.WriteLine($"\n{failed} FAILED\n")
         Console.ResetColor()
     
     // Interactive mode
-    Console.WriteLine(String.replicate 50 "=")
-    Console.WriteLine("Interactive Mode - Enter expressions below:")
-    Console.WriteLine(String.replicate 50 "=")
+
+    Console.WriteLine("Enter expressions below:")
+
     
     let input = getInputString()
     

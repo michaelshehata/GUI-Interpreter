@@ -2,9 +2,7 @@ module public NumberSystem
 
 open System
 
-
-// TYPE DEFINITIONS
-
+// Type Definitions
 
 type Number =
     | Integer of int64
@@ -12,16 +10,18 @@ type Number =
     | Rational of int64 * int64  // numerator, denominator
     | Complex of float * float    // real, imaginary
 
+let private guardZero b op =
+    match b with
+    | Integer 0L | Float 0.0 -> failwith "Division by zero"
+    | Rational (0L, _) -> failwith "Division by zero"
+    | _ -> op ()
 
-// HELPER FUNCTIONS FOR RATIONALS
-
-
-// Greatest Common Divisor (Euclidean algorithm)
-let rec private gcd a b =
+// Greatest Common Divisor using Euclidean algorithm
+let rec private gcd a b =  // int64 arguments
     if b = 0L then abs a
     else gcd b (a % b)
 
-// Simplify a rational number
+// Simplify a rational number and avoid division by zero
 let private simplifyRational (num: int64) (den: int64) =
     if den = 0L then
         failwith "Division by zero: denominator cannot be zero"
@@ -35,8 +35,7 @@ let private simplifyRational (num: int64) (den: int64) =
         (simplifiedNum, simplifiedDen)
 
 
-// NUMBER CONVERSION
-
+// NUMBER CONVERSION //
 
 let toFloat = function
     | Integer i -> float i
@@ -62,7 +61,6 @@ let simplifyNumber = function
 
 
 // ARITHMETIC OPERATIONS (Public Interface)
-
 
 let add a b =
     match (a, b) with
@@ -243,7 +241,6 @@ let negate = function
 
 
 // STRING REPRESENTATION
-
 
 let toString = function
     | Integer i -> string i
