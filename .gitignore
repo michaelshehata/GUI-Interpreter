@@ -1,4 +1,6 @@
-./CS_GUI/bin
-./CS_GUI/obj
-./FS_Interpreter/bin
-./FS_Interpreter/obj
+CS_GUI/bin
+CS_GUI/obj
+FS_Interpreter/bin
+FS_Interpreter/obj
+
+
