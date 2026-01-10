@@ -85,7 +85,9 @@ let rec parseNeval tList =
                     
                     let exprTokens = extractExprTokens [] tail
                     let x0 = NumberSystem.toFloat arg2Value
-                    let stepSize = 1e-5
+                    let stepSize = 1e-4
+                        
+                        
                     
                     // Save current x if it exists and is user-assigned
                     let savedX = SymbolTable.tryFind "x" SymbolTable.current
@@ -307,6 +309,58 @@ and parseStatement tList =
     match tList with
     | [] -> ([], Integer 0L)
     
+    // ADDED: Static typing - int x = 10;
+    | Lexer.IntType :: Ident name :: Assign :: tail ->
+        let (remaining, value) = parseNeval tail
+        let intValue = NumberSystem.coerceToInt value
+        SymbolTable.current <- SymbolTable.addUserVariableTyped name intValue SymbolTable.VarType.IntType SymbolTable.current
+        
+        match remaining with
+        | Semicolon :: rest -> 
+            if List.isEmpty rest then ([], intValue)
+            else parseStatement rest
+        | [] -> ([], intValue)
+        | _ -> raise Parser.parseError
+    
+    // ADDED: Static typing - float x = 10;
+    | Lexer.FloatType :: Ident name :: Assign :: tail ->
+        let (remaining, value) = parseNeval tail
+        let floatValue = NumberSystem.coerceToFloat value
+        SymbolTable.current <- SymbolTable.addUserVariableTyped name floatValue SymbolTable.VarType.FloatType SymbolTable.current
+        
+        match remaining with
+        | Semicolon :: rest -> 
+            if List.isEmpty rest then ([], floatValue)
+            else parseStatement rest
+        | [] -> ([], floatValue)
+        | _ -> raise Parser.parseError
+    
+    // ADDED: Static typing - rat x = 3;
+    | Lexer.RatType :: Ident name :: Assign :: tail ->
+        let (remaining, value) = parseNeval tail
+        let ratValue = NumberSystem.coerceToRational value
+        SymbolTable.current <- SymbolTable.addUserVariableTyped name ratValue SymbolTable.VarType.RatType SymbolTable.current
+        
+        match remaining with
+        | Semicolon :: rest -> 
+            if List.isEmpty rest then ([], ratValue)
+            else parseStatement rest
+        | [] -> ([], ratValue)
+        | _ -> raise Parser.parseError
+    
+    // ADDED: Static typing - complex x = 3;
+    | Lexer.ComplexType :: Ident name :: Assign :: tail ->
+        let (remaining, value) = parseNeval tail
+        let complexValue = NumberSystem.coerceToComplex value
+        SymbolTable.current <- SymbolTable.addUserVariableTyped name complexValue SymbolTable.VarType.ComplexType SymbolTable.current
+        
+        match remaining with
+        | Semicolon :: rest -> 
+            if List.isEmpty rest then ([], complexValue)
+            else parseStatement rest
+        | [] -> ([], complexValue)
+        | _ -> raise Parser.parseError
+    
     // Variable assignment: x = 10;
     | Ident name :: Assign :: tail ->
         let (remaining, value) = parseNeval tail
@@ -397,7 +451,7 @@ and executeForLoop (varName: string) (startVal: Number) (endVal: Number) (stepVa
     
     // Execute loop
     while (if step > 0.0 then current <= endFloat else current >= endFloat) do
-        // Set loop variable in symbol table - mark as user assignd
+        // Set loop variable in symbol table - mark as user assigned
         SymbolTable.current <- SymbolTable.addUserVariable varName (Float current) SymbolTable.current
         
         // Execute body - handle all statements in the body

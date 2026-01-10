@@ -20,6 +20,13 @@ type Terminal =
     | LBrace
     | RBrace
     | Comma
+    // STATIC TYPING
+    | IntType
+    | FloatType
+    | ComplexType
+    | RatType
+
+
 
 
 // Helper functions
@@ -99,11 +106,17 @@ let rec private scIdent(iStr, acc: string) =
         scIdent(tail, acc + string c)
     | _ -> (iStr, acc)
 
-// Check if a name is a recognized built-in function
+// Check if a name is a recognized built in function
 let private recognizeFunction (name: string) : Terminal option =
     match name.ToLower() with
     | "for" -> Some For | "to" -> Some To | "step" -> Some Step
     | "do" -> Some Do | "end" -> Some End
+    //Static typing keywords
+    | "int" -> Some IntType
+    | "float" -> Some FloatType
+    | "rat" -> Some RatType
+    | "complex" -> Some ComplexType
+    // Functions
     | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" 
     | "exp" | "log" | "ln" | "sqrt" | "abs" 
     | "floor" | "ceil" | "round" 

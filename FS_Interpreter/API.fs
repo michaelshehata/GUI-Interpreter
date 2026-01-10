@@ -42,7 +42,7 @@ let evaluateExpression (expression: string, xValue: float) : float =
         let (_, result) = parseNeval oList
         let resultFloat = NumberSystem.toFloat result
         
-        // Restore original x if it was user-assigned, otherwise remove it
+        // Restore original x if it was user assigned, otherwise remove it
         match savedX with
         | Some value when SymbolTable.isUserAssigned "x" ->
             SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
@@ -163,8 +163,8 @@ let getVariables () : string =
     else
         SymbolTable.current
         |> Map.toList
-        |> List.map (fun (name, value) -> 
-            sprintf "%s = %s" name (NumberSystem.toString value))
+        |> List.map (fun (name, entry) -> 
+            sprintf "%s = %s" name (NumberSystem.toString entry.Value))
         |> String.concat "\n"
 
 // Validate syntax without executing

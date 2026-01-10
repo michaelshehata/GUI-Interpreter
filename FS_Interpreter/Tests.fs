@@ -103,6 +103,14 @@ let forLoopTestCases = [
     { Expression = "sum = 0; for i = 1 to 3 do sum = sum + abs(-i) end sum"; Expected = 6.0; Description = "Sum with abs function" }
 ]
 
+// Static Typing Test Cases
+let staticTypingTestCases = [
+    { Expression = "int x = 3.7; x"; Expected = 3.0; Description = "Int type truncates float" }
+    { Expression = "float x = 5; x + 0.5"; Expected = 5.5; Description = "Float type preserves decimal" }
+    { Expression = "rat x = 3; rat y = 4; x / y"; Expected = 0.75; Description = "Rational division" }
+    { Expression = "int result = 7 / 2; result"; Expected = 3.0; Description = "Integer division truncates" }
+    { Expression = "float result = 7 / 2; result"; Expected = 3.5; Description = "Float division preserves" }
+]
 let runTest (testCase: TestCase) : TestResult =
     // Clear variables before each test
     API.clearVariables()

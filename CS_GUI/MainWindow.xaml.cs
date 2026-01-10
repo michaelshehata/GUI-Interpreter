@@ -127,7 +127,7 @@ namespace CS_GUI
 
                 string expr = GetCurrentExpression();
                 double x0 = DerivativeX0UpDown.Value ?? 0.0;
-                double stepSize = 1e-5; // fixed?
+                double stepSize = 1e-4; // CHANGED TO FIXED STEP SIZE
 
                 double value = API.differentiateNumeric(expr, x0, stepSize);
 

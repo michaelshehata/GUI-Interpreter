@@ -59,6 +59,35 @@ let simplifyNumber = function
     | Complex (r, i) when abs i < 1e-10 -> Float r
     | num -> num
 
+// TYPE COERCION for static typing
+
+let coerceToInt (num: Number) : Number =
+    match num with
+    | Integer i -> Integer i
+    | Float f -> Integer (int64 f)
+    | Rational (n, d) -> Integer (n / d)
+    | Complex (r, _) -> Integer (int64 r)
+
+let coerceToFloat (num: Number) : Number =
+    Float (toFloat num)
+
+let coerceToRational (num: Number) : Number =
+    match num with
+    | Integer i -> Rational (i, 1L)
+    | Rational _ as r -> r
+    | Float f -> 
+        let denominator = 1000000L
+        let numerator = int64 (f * float denominator)
+        simplifyNumber (Rational (numerator, denominator))
+    | Complex (r, _) -> 
+        let denominator = 1000000L
+        let numerator = int64 (r * float denominator)
+        simplifyNumber (Rational (numerator, denominator))
+
+let coerceToComplex (num: Number) : Number =
+    let (r, i) = toComplex num
+    Complex (r, i)
+
 
 // ARITHMETIC OPERATIONS (Public Interface)
 
@@ -251,6 +280,3 @@ let toString = function
     | Complex (0.0, i) -> sprintf "%gi" i
     | Complex (r, i) when i >= 0.0 -> sprintf "%g+%gi" r i
     | Complex (r, i) -> sprintf "%g%gi" r i
-
-
-

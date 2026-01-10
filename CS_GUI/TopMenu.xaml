@@ -9,13 +9,15 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_PLACEHOLDER"/>
+                <MenuItem Header="_Clear Variables" Click="ClearVariables_Click"/>
+                <MenuItem Header="_Exit" Click="Exit_Click"/>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Syntax Help" Click="SyntaxHelpMenuClicked"/>
             </MenuItem>
             <MenuItem Header="_About">
-                <MenuItem Header="_Authors !!PLACEHOLDER!!"/>
+                <MenuItem Header="_Authors" Click="Authors_Click"/>
+                <MenuItem Header="_Version" Click="Version_Click"/>
             </MenuItem>
         </Menu>
         <StackPanel></StackPanel>
