@@ -58,8 +58,9 @@ let rec parseNeval tList =
         | Func name :: Lpar :: tail ->
             let (afterExpr, argValue) = E tail
             
-            // CHANGED: Handle plot(x,y) and standard functions
+            // CHANGED: Handle plot(x,y), derivative, integrate, findroot, and standard functions
             match name, afterExpr with
+            // Two-argument plot function
             | "plot", Comma :: afterComma ->
                 let (afterArg2, arg2Value) = E afterComma
                 match afterArg2 with
@@ -69,7 +70,185 @@ let rec parseNeval tList =
                     PlotBuffer.addPoint x y
                     (rest, arg2Value)
                 | _ -> raise (System.Exception("Missing closing parenthesis for plot"))
+            
+            // INT4: derivative(expr, x0)
+            | "derivative", Comma :: afterComma ->
+                let (afterArg2, arg2Value) = E afterComma
+                match afterArg2 with
+                | Rpar :: rest ->
+                    // Extract expression tokens before first comma
+                    let rec extractExprTokens acc tokens =
+                        match tokens with
+                        | Comma :: _ -> List.rev acc
+                        | t :: ts -> extractExprTokens (t :: acc) ts
+                        | [] -> List.rev acc
+                    
+                    let exprTokens = extractExprTokens [] tail
+                    let x0 = NumberSystem.toFloat arg2Value
+                    let stepSize = 1e-5
+                    
+                    // Save current x if it exists and is user-assigned
+                    let savedX = SymbolTable.tryFind "x" SymbolTable.current
+                    let wasUserX = SymbolTable.isUserAssigned "x"
+                    
+                    // Evaluate at x0 - stepSize
+                    SymbolTable.current <- SymbolTable.addTempVariable "x" (Float (x0 - stepSize)) SymbolTable.current
+                    let (_, leftVal) = parseNeval exprTokens
+                    let leftFloat = NumberSystem.toFloat leftVal
+                    
+                    // Evaluate at x0 + stepSize
+                    SymbolTable.current <- SymbolTable.addTempVariable "x" (Float (x0 + stepSize)) SymbolTable.current
+                    let (_, rightVal) = parseNeval exprTokens
+                    let rightFloat = NumberSystem.toFloat rightVal
+                    
+                    // Restore x if it was user-assigned, otherwise remove
+                    match savedX, wasUserX with
+                    | Some value, true ->
+                        SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
+                    | _ ->
+                        SymbolTable.current <- SymbolTable.removeTempVariable "x" SymbolTable.current
+                    
+                    let deriv = (rightFloat - leftFloat) / (2.0 * stepSize)
+                    (rest, Float deriv)
+                | _ -> raise (System.Exception("derivative requires 2 arguments: (expression, x_value)"))
+            
+            // INT4: integrate(expr, a, b)
+            | "integrate", Comma :: afterComma ->
+                let (afterArg2, arg2Value) = E afterComma
+                match afterArg2 with
+                | Comma :: afterComma2 ->
+                    let (afterArg3, arg3Value) = E afterComma2
+                    match afterArg3 with
+                    | Rpar :: rest ->
+                        let rec extractExprTokens acc tokens =
+                            match tokens with
+                            | Comma :: _ -> List.rev acc
+                            | t :: ts -> extractExprTokens (t :: acc) ts
+                            | [] -> List.rev acc
+                        
+                        let exprTokens = extractExprTokens [] tail
+                        let a = NumberSystem.toFloat arg2Value
+                        let b = NumberSystem.toFloat arg3Value
+                        let steps = 1000
+                        
+                        // Save x state
+                        let savedX = SymbolTable.tryFind "x" SymbolTable.current
+                        let wasUserX = SymbolTable.isUserAssigned "x"
+                        
+                        // Trapezoidal rule
+                        let mutable startX = a
+                        let mutable endX = b
+                        let swapped = if startX > endX then
+                                        let tmp = startX
+                                        startX <- endX
+                                        endX <- tmp
+                                        true
+                                      else false
+                        
+                        let h = (endX - startX) / float steps
+                        
+                        // Evaluate at start
+                        SymbolTable.current <- SymbolTable.addTempVariable "x" (Float startX) SymbolTable.current
+                        let (_, startVal) = parseNeval exprTokens
+                        let fStart = NumberSystem.toFloat startVal
+                        
+                        // Evaluate at end
+                        SymbolTable.current <- SymbolTable.addTempVariable "x" (Float endX) SymbolTable.current
+                        let (_, endVal) = parseNeval exprTokens
+                        let fEnd = NumberSystem.toFloat endVal
+                        
+                        // Sum interior points
+                        let mutable sum = 0.0
+                        for i = 1 to steps - 1 do
+                            let x = startX + float i * h
+                            SymbolTable.current <- SymbolTable.addTempVariable "x" (Float x) SymbolTable.current
+                            let (_, midVal) = parseNeval exprTokens
+                            sum <- sum + NumberSystem.toFloat midVal
+                        
+                        // Restore x
+                        match savedX, wasUserX with
+                        | Some value, true ->
+                            SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
+                        | _ ->
+                            SymbolTable.current <- SymbolTable.removeTempVariable "x" SymbolTable.current
+                        
+                        let area = h * ((fStart + fEnd) / 2.0 + sum)
+                        let finalArea = if swapped then -area else area
+                        
+                        (rest, Float finalArea)
+                    | _ -> raise (System.Exception("Missing closing parenthesis for integrate"))
+                | _ -> raise (System.Exception("integrate requires 3 arguments: (expression, a, b)"))
+            
+            // INT4: findroot(expr, a, b)
+            | "findroot", Comma :: afterComma ->
+                let (afterArg2, arg2Value) = E afterComma
+                match afterArg2 with
+                | Comma :: afterComma2 ->
+                    let (afterArg3, arg3Value) = E afterComma2
+                    match afterArg3 with
+                    | Rpar :: rest ->
+                        let rec extractExprTokens acc tokens =
+                            match tokens with
+                            | Comma :: _ -> List.rev acc
+                            | t :: ts -> extractExprTokens (t :: acc) ts
+                            | [] -> List.rev acc
+                        
+                        let exprTokens = extractExprTokens [] tail
+                        let a = NumberSystem.toFloat arg2Value
+                        let b = NumberSystem.toFloat arg3Value
+                        
+                        // Save x state
+                        let savedX = SymbolTable.tryFind "x" SymbolTable.current
+                        let wasUserX = SymbolTable.isUserAssigned "x"
+                        
+                        // Bisection method
+                        let tolerance = 1e-6
+                        let maxIterations = 100
+                        
+                        let evalAt x =
+                            SymbolTable.current <- SymbolTable.addTempVariable "x" (Float x) SymbolTable.current
+                            let (_, result) = parseNeval exprTokens
+                            NumberSystem.toFloat result
+                        
+                        let mutable left = a
+                        let mutable right = b
+                        let mutable fLeft = evalAt left
+                        let mutable fRight = evalAt right
+                        
+                        if fLeft * fRight > 0.0 then
+                            raise (System.Exception("Function must have opposite signs at a and b"))
+                        
+                        let mutable root = (left + right) / 2.0
+                        let mutable i = 0
+                        
+                        while i < maxIterations && (right - left) / 2.0 > tolerance do
+                            root <- (left + right) / 2.0
+                            let fMid = evalAt root
+                            
+                            if abs fMid < tolerance then
+                                left <- root
+                                right <- root
+                            elif fLeft * fMid < 0.0 then
+                                right <- root
+                                fRight <- fMid
+                            else
+                                left <- root
+                                fLeft <- fMid
+                            
+                            i <- i + 1
+                        
+                        // Restore x
+                        match savedX, wasUserX with
+                        | Some value, true ->
+                            SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
+                        | _ ->
+                            SymbolTable.current <- SymbolTable.removeTempVariable "x" SymbolTable.current
+                        
+                        (rest, Float root)
+                    | _ -> raise (System.Exception("Missing closing parenthesis for findroot"))
+                | _ -> raise (System.Exception("findroot requires 3 arguments: (expression, a, b)"))
                 
+            // Standard single-argument functions
             | _, Rpar :: rest ->
                 let result = 
                     let argFloat = NumberSystem.toFloat argValue
@@ -131,7 +310,8 @@ and parseStatement tList =
     // Variable assignment: x = 10;
     | Ident name :: Assign :: tail ->
         let (remaining, value) = parseNeval tail
-        SymbolTable.current <- SymbolTable.add name value SymbolTable.current
+        // CHANGED: Mark as user-assigned variable
+        SymbolTable.current <- SymbolTable.addUserVariable name value SymbolTable.current
         
         match remaining with
         | Semicolon :: rest -> 
@@ -212,10 +392,13 @@ and executeForLoop (varName: string) (startVal: Number) (endVal: Number) (stepVa
     let mutable current = startFloat
     let mutable lastResult = Integer 0L
     
+
+    let wasUserAssigned = SymbolTable.isUserAssigned varName
+    
     // Execute loop
     while (if step > 0.0 then current <= endFloat else current >= endFloat) do
-        // Set loop variable in symbol table
-        SymbolTable.current <- SymbolTable.add varName (Float current) SymbolTable.current
+        // Set loop variable in symbol table - mark as user assignd
+        SymbolTable.current <- SymbolTable.addUserVariable varName (Float current) SymbolTable.current
         
         // Execute body - handle all statements in the body
         if not (List.isEmpty body) then
@@ -224,5 +407,6 @@ and executeForLoop (varName: string) (startVal: Number) (endVal: Number) (stepVa
         
         // Increment
         current <- current + step
+    
     
     lastResult

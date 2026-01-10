@@ -31,13 +31,25 @@ let interpret (input: string) : string =
 // Evaluate expression with x value (for plotting)
 let evaluateExpression (expression: string, xValue: float) : float =
     try
-        // Store x value in symbol table
-        SymbolTable.current <- SymbolTable.add "x" (Float xValue) SymbolTable.current
+        // FIXED: Use temporary variable for plotting
+        let savedX = SymbolTable.tryFind "x" SymbolTable.current
+        
+        // Store x value as temporary
+        SymbolTable.current <- SymbolTable.addTempVariable "x" (Float xValue) SymbolTable.current
         
         // Lex and evaluate the expression
         let oList = lexer expression
         let (_, result) = parseNeval oList
-        NumberSystem.toFloat result
+        let resultFloat = NumberSystem.toFloat result
+        
+        // Restore original x if it was user-assigned, otherwise remove it
+        match savedX with
+        | Some value when SymbolTable.isUserAssigned "x" ->
+            SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
+        | _ ->
+            SymbolTable.current <- SymbolTable.removeTempVariable "x" SymbolTable.current
+        
+        resultFloat
     with
     | ex -> raise (System.Exception($"Error evaluating expression: {ex.Message}"))
 
@@ -130,12 +142,7 @@ let findRootBisection (expression: string) (a: float) (b: float) (tolerance: flo
     with
     | ex -> raise (System.Exception($"Error finding root: {ex.Message}"))
 
-
-
-
-
 // Get parse tree as string
-
 let getParseTreeString (input: string) : string =
     try
         let tokens = lexer input
@@ -146,6 +153,7 @@ let getParseTreeString (input: string) : string =
 
 // Clear all variables
 let clearVariables () : unit =
+    SymbolTable.clearAll()
     SymbolTable.current <- SymbolTable.empty
 
 // Get all variables as formatted string
@@ -182,10 +190,15 @@ let clearPlotPoints () : unit =
 let plotFunction (expression: string) (xMin: float) (xMax: float) (step: float) : unit =
     PlotBuffer.clear()
     
+    // FIXED: Save x if it was user-assigned
+    let savedX = SymbolTable.tryFind "x" SymbolTable.current
+    let wasUserAssigned = SymbolTable.isUserAssigned "x"
+    
     let mutable x = xMin
     while x <= xMax do
         try
-            SymbolTable.current <- SymbolTable.add "x" (Float x) SymbolTable.current
+            // Use temporary variable
+            SymbolTable.current <- SymbolTable.addTempVariable "x" (Float x) SymbolTable.current
             let tokens = lexer expression
             let (_, result) = parseNeval tokens
             let y = NumberSystem.toFloat result
@@ -194,6 +207,14 @@ let plotFunction (expression: string) (xMin: float) (xMax: float) (step: float) 
         | ex -> () // Skip points that cause errors
         
         x <- x + step
+    
+    // FIXED: Restore user assigned x or remove temporary x
+    match savedX with
+    | Some value when wasUserAssigned ->
+        SymbolTable.current <- SymbolTable.add "x" value SymbolTable.current
+    | _ ->
+        SymbolTable.current <- SymbolTable.removeTempVariable "x" SymbolTable.current
+
 let getInterpolationMode () : int =
     match PlotBuffer.getInterpolation() with
     | PlotBuffer.Linear -> 0
@@ -220,11 +241,19 @@ Utility:
   ceil(x)  - round up
   round(x) - round to nearest integer
 
+Advanced Math (INT4):
+  derivative(expr, x0)     - compute f'(x0)
+  integrate(expr, a, b)    - compute ∫[a,b] f(x) dx
+  findroot(expr, a, b)     - find root in [a,b]
+
 Examples:
-  sin(0)        → 0
-  sqrt(16)      → 4
-  abs(-5)       → 5
-  exp(1)        → 2.71828...
+  sin(0)                → 0
+  sqrt(16)              → 4
+  abs(-5)               → 5
+  exp(1)                → 2.71828...
+  derivative(x^2, 2)    → 4
+  integrate(x^2, 0, 1)  → 0.333...
+  findroot(x^2-4, 0, 5) → 2
 """
 
 // Get syntax help text
