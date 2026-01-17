@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-using static API;  // or just: using API;
+using static API;
 
 namespace CS_GUI
 {
@@ -47,12 +47,10 @@ namespace CS_GUI
                 errorBox.Text = ""; // clear error box text
 
                 string inputText = inputBox.Text;
-                // change
                 API.clearPlotPoints();
                 // send input text to interpreter
                 string interpreterReturn = API.interpret(inputText);
                 AddToHistory(inputText, interpreterReturn); // add expression and result to history
-                // change
                 var points = API.getPlotPoints();
                 if (points.Any())
                 {
@@ -88,9 +86,7 @@ namespace CS_GUI
 
                 string function = inputBox.Text;
                 // strip leading "y ="
-                string expr = function.Contains("=")
-                    ? function.Split("=")[1].Trim()
-                    : function.Trim();
+                string expr = GetCurrentExpression();
 
                 double minX = MinXDoubleUpDown.Value ?? 0;
                 double maxX = MaxXDoubleUpDown.Value ?? 0;
@@ -103,6 +99,7 @@ namespace CS_GUI
                 var points = API.getPlotPoints();
 
                 // hand points over to plotting area
+                PlotArea.ResetAxes();
                 PlotArea.PlotFunction(points, minX, maxX);
             }
             catch (Exception ex)
@@ -112,7 +109,6 @@ namespace CS_GUI
         }
         private string GetCurrentExpression()
         {
-            // Reuse the same logic as plotting
             string text = inputBox.Text;
             return text.Contains("=")
                 ? text.Split('=')[1].Trim()
@@ -127,7 +123,7 @@ namespace CS_GUI
 
                 string expr = GetCurrentExpression();
                 double x0 = DerivativeX0UpDown.Value ?? 0.0;
-                double stepSize = 1e-4; // CHANGED TO FIXED STEP SIZE
+                double stepSize = 1e-4;
 
                 double value = API.differentiateNumeric(expr, x0, stepSize);
 
@@ -217,5 +213,121 @@ namespace CS_GUI
                     break;
             }
         }
+
+        private void buttonPlotTangent_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = "";
+
+                string expr = GetCurrentExpression();
+                double x0 = DerivativeX0UpDown.Value ?? 0.0;
+
+                double stepSize = 1e-4;
+
+                // f(x0)
+                double fx0 = API.evaluateExpression(expr, x0);
+
+                // f'(x0)
+                double slope = API.differentiateNumeric(expr, x0, stepSize);
+
+                // plot tangent line on existing plot
+                PlotArea.PlotTangentLine(
+                    x0,
+                    fx0,
+                    slope,
+                    MinXDoubleUpDown.Value ?? x0 - 5,
+                    MaxXDoubleUpDown.Value ?? x0 + 5
+                );
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
+
+        private void buttonClearTangents_Click(object sender, RoutedEventArgs e)
+        {
+            PlotArea.ClearTangents();
+        }
+
+
+        private void buttonPlotIntegral_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                errorBox.Text = "";
+
+                string expr = GetCurrentExpression();
+                double a = IntegralAUpDown.Value ?? 0.0;
+                double b = IntegralBUpDown.Value ?? 0.0;
+
+                if (a > b)
+                {
+                    double tmp = a;
+                    a = b;
+                    b = tmp;
+                }
+
+                int steps = 1000;
+
+                // calculate area
+                double area = API.integrateTrapezoidal(expr, a, b, steps);
+
+                // show visual area
+                double step = StepDoubleUpDown.Value ?? 0.01;
+
+                API.clearPlotPoints();
+                API.plotFunction(expr, a, b, step);
+                var areaPoints = API.getPlotPoints();
+
+                PlotArea.PlotIntegrationArea(
+                    areaPoints,
+                    a,
+                    b,
+                    area,
+                    expr
+                );
+            }
+            catch (Exception ex)
+            {
+                errorBox.Text = ex.Message;
+            }
+        }
+
+        private void buttonClearIntegrals_Click(object sender, RoutedEventArgs e)
+        {
+            PlotArea.ClearIntegrals();
+     
+        }
+
+        private void AspectRatioCheckBox_Changed(object sender, RoutedEventArgs e)
+        {
+            PlotArea.LockAspectRatio =
+                (sender as CheckBox)?.IsChecked ?? false;
+
+            // replot current function if possible
+            try
+            {
+                string expr = GetCurrentExpression();
+
+                double minX = MinXDoubleUpDown.Value ?? 0;
+                double maxX = MaxXDoubleUpDown.Value ?? 0;
+                double step = StepDoubleUpDown.Value ?? 0.1;
+
+                API.clearPlotPoints();
+                API.plotFunction(expr, minX, maxX, step);
+
+                var points = API.getPlotPoints();
+                PlotArea.ResetAxes();
+                PlotArea.PlotFunction(points, minX, maxX);
+            }
+            catch
+            {
+                // ignore if no valid plot yet
+            }
+        }
+
+
     }
 }

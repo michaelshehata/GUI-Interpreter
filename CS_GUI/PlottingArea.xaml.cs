@@ -1,5 +1,10 @@
-﻿using System;
+﻿using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot.Wpf;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
-using OxyPlot.Wpf;
 
 namespace CS_GUI
 {
@@ -25,6 +26,12 @@ namespace CS_GUI
     public partial class PlottingArea : UserControl
     {
         private PlotModel _model;
+        private readonly OxyColor _functionColour = OxyColors.SteelBlue;
+        private const double _lineThickness = 2;
+        public bool LockAspectRatio { get; set; } = false;
+        private bool _axesInitialised = false;
+
+
 
         public enum InterpolationMode
         {
@@ -41,78 +48,304 @@ namespace CS_GUI
         }
 
         public void PlotFunction(IEnumerable<Tuple<double, double>> points,
-                               double xMin, double xMax)
+                                 double xMin, double xMax)
         {
-            _model.Series.Clear();
 
-            var series = new LineSeries();
-
-            if (Interpolation == InterpolationMode.Spline)
+            if (!PlotViewControl.IsLoaded ||
+                PlotViewControl.ActualWidth <= 1 ||
+                PlotViewControl.ActualHeight <= 1)
             {
-                series.InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline;
+                return;
             }
 
-            double yMin = double.PositiveInfinity;
-            double yMax = double.NegativeInfinity;
+
+            _model.Series.Clear();
+
+            const double jumpThreshold = 10.0;   // asymptote detection
+            const double yVisualLimit = 10.0;   // ignore extreme values for scaling
+
+            bool hasDiscontinuities = false;
+
+            var validYsForScaling = new List<double>();
+
+            LineSeries currentSeries = CreateSeries();
+            _model.Series.Add(currentSeries);
+
+            DataPoint? lastPoint = null;
 
             foreach (var p in points)
             {
                 double x = p.Item1;
                 double y = p.Item2;
 
-                series.Points.Add(new DataPoint(x, y));
+                // Invalid values -> break line
+                if (double.IsNaN(y) || double.IsInfinity(y))
+                {
+                    hasDiscontinuities = true;
+                    currentSeries = CreateSeries();
+                    _model.Series.Add(currentSeries);
+                    lastPoint = null;
+                    continue;
+                }
 
-                if (y < yMin) yMin = y;
-                if (y > yMax) yMax = y;
+                // Large jump -> likely asymptote
+                if (lastPoint.HasValue &&
+                    Math.Abs(y - lastPoint.Value.Y) > jumpThreshold)
+                {
+                    hasDiscontinuities = true;
+                    currentSeries = CreateSeries();
+                    _model.Series.Add(currentSeries);
+                }
+
+                currentSeries.Points.Add(new DataPoint(x, y));
+                lastPoint = new DataPoint(x, y);
+
+                // Collect reasonable values for Y scaling
+                if (Math.Abs(y) <= yVisualLimit)
+                    validYsForScaling.Add(y);
             }
 
-            _model.Series.Add(series);
-
-            _model.Axes.Clear();
-
-            // X axis
-            var xAxis = new LinearAxis
+            // Axis scaling (INITIAL ONLY)
+            if (!_axesInitialised)
             {
-                Position = AxisPosition.Bottom,
-                Minimum = xMin,
-                Maximum = xMax,
-                MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.Dot,
-                MajorGridlineThickness = 1,
-                MinorGridlineThickness = 0.5,
-            };
+                _model.Axes.Clear();
 
-            // handle no-points / weird cases
-            if (double.IsInfinity(yMin) || double.IsInfinity(yMax))
-            {
-                yMin = -1;
-                yMax = 1;
+                var xAxis = new LinearAxis
+                {
+                    Position = AxisPosition.Bottom,
+                    Minimum = xMin,
+                    Maximum = xMax,
+                    MajorGridlineStyle = LineStyle.Solid,
+                    MinorGridlineStyle = LineStyle.Dot
+                };
+
+                double yMin = -1;
+                double yMax = 1;
+
+                if (validYsForScaling.Any())
+                {
+                    yMin = validYsForScaling.Min();
+                    yMax = validYsForScaling.Max();
+
+                    if (Math.Abs(yMax - yMin) < 1e-6)
+                    {
+                        yMin -= 1;
+                        yMax += 1;
+                    }
+                    else
+                    {
+                        double padding = (yMax - yMin) * 0.1;
+                        yMin -= padding;
+                        yMax += padding;
+                    }
+                }
+
+                double yMinFinal = yMin;
+                double yMaxFinal = yMax;
+
+                // 1:1 aspect ratio lock
+                if (LockAspectRatio)
+                {
+                    double xRange = xMax - xMin;
+                    double yRange = yMax - yMin;
+                    if (yRange <= 0) yRange = 1;
+
+                    double plotWidth = PlotViewControl.ActualWidth;
+                    double plotHeight = PlotViewControl.ActualHeight;
+
+                    if (plotWidth <= 0 || plotHeight <= 0)
+                    {
+                        plotWidth = 800;
+                        plotHeight = 600;
+                    }
+
+                    double plotAspect = plotWidth / plotHeight;
+                    double dataAspect = xRange / yRange;
+
+                    if (dataAspect > plotAspect)
+                    {
+                        double newYRange = xRange / plotAspect;
+                        double yMid = (yMin + yMax) / 2.0;
+
+                        yMinFinal = yMid - newYRange / 2.0;
+                        yMaxFinal = yMid + newYRange / 2.0;
+                    }
+                }
+
+                LinearAxis yAxis;
+
+                if (LockAspectRatio)
+                {
+                    yAxis = new LinearAxis
+                    {
+                        Position = AxisPosition.Left,
+                        Minimum = yMinFinal,
+                        Maximum = yMaxFinal,
+                        MajorGridlineStyle = LineStyle.Solid,
+                        MinorGridlineStyle = LineStyle.Dot
+                    };
+                }
+                else
+                {
+                    // let OxyPlot handle y scaling 
+                    yAxis = new LinearAxis
+                    {
+                        Position = AxisPosition.Left,
+                        MajorGridlineStyle = LineStyle.Solid,
+                        MinorGridlineStyle = LineStyle.Dot
+                    };
+                }
+
+
+                _model.Axes.Add(xAxis);
+                _model.Axes.Add(yAxis);
+
+                _axesInitialised = true;
             }
 
-            double yRange = yMax - yMin;
-            if (yRange <= 0)
+
+
+            // disable spline if unsafe
+
+            if (hasDiscontinuities && Interpolation == InterpolationMode.Spline)
             {
-                yRange = 1;
+                foreach (var s in _model.Series.OfType<LineSeries>())
+                    s.InterpolationAlgorithm = null;
             }
-
-            double padding = yRange * 0.1;
-
-            var yAxis = new LinearAxis
-            {
-                Position = AxisPosition.Left,
-                Minimum = yMin - padding,
-                Maximum = yMax + padding,
-                MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.Dot,
-                MajorGridlineThickness = 1,
-                MinorGridlineThickness = 0.5,
-            };
-
-            _model.Axes.Add(xAxis);
-            _model.Axes.Add(yAxis);
 
             _model.InvalidatePlot(true);
         }
+
+        public void ResetAxes()
+        {
+            _axesInitialised = false;
+        }
+
+
+        private LineSeries CreateSeries()
+        {
+            var series = new LineSeries
+            {
+                Color = _functionColour,
+                StrokeThickness = _lineThickness,
+                MarkerType = MarkerType.None
+            };
+
+            if (Interpolation == InterpolationMode.Spline)
+            {
+                series.InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline;
+            }
+
+            return series;
+        }
+
+        public void PlotTangentLine(
+            double x0,
+            double fx0,
+            double slope,
+            double xMin,
+            double xMax)
+        {
+            var tangentSeries = new LineSeries
+            {
+                Color = OxyColors.IndianRed,
+                StrokeThickness = 2,
+                LineStyle = LineStyle.Dash,
+                Title = "Tangent",
+                Tag = "Tangent"
+            };
+
+            double y1 = fx0 + slope * (xMin - x0);
+            double y2 = fx0 + slope * (xMax - x0);
+
+            tangentSeries.Points.Add(new DataPoint(xMin, y1));
+            tangentSeries.Points.Add(new DataPoint(xMax, y2));
+
+            var pointSeries = new ScatterSeries
+            {
+                MarkerType = MarkerType.Circle,
+                MarkerSize = 5,
+                MarkerFill = OxyColors.IndianRed,
+                Tag = "Tangent"
+            };
+
+            pointSeries.Points.Add(new ScatterPoint(x0, fx0));
+
+            _model.Series.Add(tangentSeries);
+            _model.Series.Add(pointSeries);
+
+            _model.InvalidatePlot(true);
+        }
+
+        public void ClearTangents()
+        {
+            var tangents = _model.Series
+                .Where(s => s.Tag?.ToString() == "Tangent")
+                .ToList();
+
+            foreach (var series in tangents)
+            {
+                _model.Series.Remove(series);
+            }
+
+            _model.InvalidatePlot(true);
+        }
+
+        public void PlotIntegrationArea(
+            IEnumerable<Tuple<double, double>> points,
+            double a,
+            double b,
+            double areaValue,
+            string expression)
+        {
+            var areaSeries = new AreaSeries
+            {
+                Color = OxyColor.FromAColor(80, OxyColors.ForestGreen),
+                StrokeThickness = 1,
+                LineStyle = LineStyle.Solid,
+                Tag = "Integral",
+
+                // Mouse-over label
+                TrackerFormatString =
+                    $"∫[{a}, {b}] {expression} dx\n≈ {areaValue:F6}"
+            };
+
+            foreach (var p in points)
+            {
+                double x = p.Item1;
+                double y = p.Item2;
+
+                if (x < a || x > b)
+                    continue;
+
+                if (double.IsNaN(y) || double.IsInfinity(y))
+                    continue;
+
+                areaSeries.Points.Add(new DataPoint(x, y));
+                areaSeries.Points2.Add(new DataPoint(x, 0));
+            }
+
+            _model.Series.Add(areaSeries);
+            _model.InvalidatePlot(true);
+        }
+
+
+
+        public void ClearIntegrals()
+        {
+            var integrals = _model.Series
+                .Where(s => s.Tag?.ToString() == "Integral")
+                .ToList();
+
+            foreach (var s in integrals)
+            {
+                _model.Series.Remove(s);
+            }
+
+            _model.InvalidatePlot(true);
+        }
+
+
 
 
     }

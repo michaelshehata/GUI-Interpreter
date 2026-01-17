@@ -29,7 +29,7 @@
         <Grid Grid.Row="2" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
                 <!-- Left: input/error + plot -->
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="4*"/>
                 <!-- Right: history + parse tree -->
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
@@ -112,7 +112,7 @@
                                            Width="70"
                                            Height="24"
                                            Increment="0.1"
-                                           Value="1" />
+                                           Value="-100" />
                     </StackPanel>
 
                     <!-- Max X -->
@@ -138,7 +138,7 @@
                                            Width="70"
                                            Height="24"
                                            Increment="0.1"
-                                           Value="1" />
+                                           Value="0.01" />
                     </StackPanel>
                     <!-- Interpolation -->
                     <StackPanel Orientation="Horizontal">
@@ -153,6 +153,12 @@
                             <ComboBoxItem Content="Linear"/>
                             <ComboBoxItem Content="Spline"/>
                         </ComboBox>
+                        <CheckBox Content="1:1 Axis"
+                          Margin="5"
+                          IsChecked="True"
+                          Checked="AspectRatioCheckBox_Changed"
+                          Unchecked="AspectRatioCheckBox_Changed"/>
+
                     </StackPanel>
                 </StackPanel>
                 <!-- Advanced Maths (change at will) -->
@@ -173,8 +179,15 @@
                                                Value="0" />
                             <Button x:Name="buttonDerivative"
                                     Content="Compute"
-                                    Margin="10,0,0,0"
+                                    Margin="10,0,10,0"
                                     Click="buttonDerivative_Click"/>
+                            <Button x:Name="buttonPlotTangent"
+                                Content="Plot Tangent"
+                                Margin="0,0,10,0"
+                                Click="buttonPlotTangent_Click"/>
+                            <Button x:Name="buttonClearTangents"
+                                Content="Clear Tangents"
+                                Click="buttonClearTangents_Click"/>
                         </StackPanel>
 
                         <!-- Root finding -->
@@ -219,6 +232,14 @@
                                     Content="Integrate"
                                     Margin="10,0,0,0"
                                     Click="buttonIntegrate_Click"/>
+                            <Button x:Name="buttonPlotIntegral"
+                                Content="Plot Integral"
+                                Margin="10,0,0,0"
+                                Click="buttonPlotIntegral_Click"/>
+                            <Button x:Name="buttonClearIntegrals"
+                                Content="Clear Integral"
+                                Margin="10,0,0,0"
+                                Click="buttonClearIntegrals_Click"/>
                         </StackPanel>
 
                     </StackPanel>
