@@ -9,7 +9,9 @@ open SymbolTable
 open AST
 open PlotBuffer
 
-// Function to print list of terminals (for debugging)
+// Purpose: Print a list of lexer terminals for debugging
+// Arguments: list of Terminal tokens
+// Returns: unit
 let rec printTList (lst: Terminal list) : unit = 
     match lst with
     | head::tail -> 
@@ -18,7 +20,9 @@ let rec printTList (lst: Terminal list) : unit =
     | [] -> 
         Console.Write("EOL\n")
 
-// Main interpreter function
+// Purpose: Interpret and evaluate a user input statement
+// Arguments: raw input string
+// Returns: Evaluation result as a string
 let interpret (input: string) : string =
     try
         let oList = lexer input
@@ -28,7 +32,9 @@ let interpret (input: string) : string =
     with
     | ex -> raise (System.Exception(ex.Message))
 
-// Evaluate expression with x value (for plotting)
+// Purpose: Evaluate an expression with an x value
+// Arguments: expression - expression string, xValue - x value
+// Returns: Result of evaluation as float.
 let evaluateExpression (expression: string, xValue: float) : float =
     try
         // FIXED: Use temporary variable for plotting
@@ -53,6 +59,9 @@ let evaluateExpression (expression: string, xValue: float) : float =
     with
     | ex -> raise (System.Exception($"Error evaluating expression: {ex.Message}"))
 
+// Purpose: Approximate the derivative of f(x)
+// Arguments: expression, x0, stepSize
+// Returns: Approximate derivative value.
 let differentiateNumeric (expression: string) (x0: float) (stepSize: float) : float =
     if stepSize <= 0.0 then
         raise (System.Exception("Step size must be positive for differentiation."))
@@ -63,7 +72,9 @@ let differentiateNumeric (expression: string) (x0: float) (stepSize: float) : fl
     with
     | ex -> raise (System.Exception($"Error computing derivative: {ex.Message}"))
 
-/// trapezium rule to approximate definite integral of f(x) from a to b
+// Purpose: Approximate a definite integral using the trapezium rule.
+// Arguments: expression, a/b - bounds, steps - intervals
+// Returns: Approximate integral value.
 let integrateTrapezoidal (expression: string) (a: float) (b: float) (steps: int) : float =
     if steps <= 0 then
         raise (System.Exception("Number of steps must be positive for integration."))
@@ -99,7 +110,9 @@ let integrateTrapezoidal (expression: string) (a: float) (b: float) (steps: int)
         with
         | ex -> raise (System.Exception($"Error computing integral: {ex.Message}"))
 
-// Bisection root finder for f(x) on [a, b]
+/// Purpose: Find a root of f(x) using the bisection method
+/// Arguments: expression - function expression, a/b - interval, tolerance, maxIterations.
+/// Returns: Approximate root value.
 let findRootBisection (expression: string) (a: float) (b: float) (tolerance: float) (maxIterations: int) : float =
     if maxIterations <= 0 then
         raise (System.Exception("maxIterations must be positive for root finding."))
@@ -142,7 +155,7 @@ let findRootBisection (expression: string) (a: float) (b: float) (tolerance: flo
     with
     | ex -> raise (System.Exception($"Error finding root: {ex.Message}"))
 
-// Get parse tree as string
+// Get parse tree as a string
 let getParseTreeString (input: string) : string =
     try
         let tokens = lexer input

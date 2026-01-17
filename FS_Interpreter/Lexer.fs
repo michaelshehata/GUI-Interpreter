@@ -40,13 +40,19 @@ let private intVal (c:char) = int c - int '0'
 // Exception
 let lexError = System.Exception("Lexer error")
 
-// Recursive digit scanner 
+
+// Purpose: Scan consecutive digits and build the integer part of a number.
+// Arguments: iStr - remaining char list, iVal - curret accumulated value
+// Returns: (remainingChars, parsedValue) as char list, float.
 let rec private scInt(iStr, iVal:float) = 
     match iStr with
     | c :: tail when isdigit c -> scInt(tail, 10.0*iVal+(float(intVal c)))
     | _ -> (iStr, iVal)
 
-// Recursive fraction scanner
+
+// Purpose: Scan fractional digits after '.' and accumulate decimal value.
+// Arguments: iStr - remaining chars, fracVal - accumulated fraction, divisor - current divisor.
+// Returns: (remainingChars, fracValue) as char list, float.
 let rec private scFrac(iStr, fracVal, divisor) =
     match iStr with
     | c :: tail when isdigit c -> 
@@ -54,7 +60,10 @@ let rec private scFrac(iStr, fracVal, divisor) =
         scFrac(tail, newFrac, divisor * 10.0)
     | _ -> (iStr, fracVal)
 
-// Exponent scanner for exponential notation (e.g., 1.5E3)
+
+// Purpose: Parse optional exponent part 
+// Arguments: iStr - remaining char list starting at exponent marker or next token.
+// Returns: (remainingChars, expValue) as char list, float.
 let private scExponent(iStr) =
     match iStr with
     | [] -> ([], 0.0)
@@ -72,7 +81,10 @@ let private scExponent(iStr) =
         | _ -> raise lexError
     | _ -> (iStr, 0.0)
 
-// Number scanner - handles integers, floats, and exponential notation
+
+// Purpose: Parse an integer/float/exponential number (optionally an 'i')
+// Arguments: iStr - remaining char list list starting with a digit
+// Returns: (remainingChars, Number) as (char list, Number).
 let private scNum(iStr) =
     match iStr with
     | c :: tail when isdigit c -> 
@@ -99,14 +111,20 @@ let private scNum(iStr) =
             (afterExp, number)
     | _ -> raise lexError
 
-// Scan an identifier or function name
+
+// Purpose: Scan an identifier consisting of letters/digits/underscore.
+// Arguments: iStr - remaining chars, acc - current id string.
+// Returns: (remainingChars, name) as char list, string.
 let rec private scIdent(iStr, acc: string) =
     match iStr with
     | c :: tail when isLetterOrDigit c || c = '_' -> 
         scIdent(tail, acc + string c)
     | _ -> (iStr, acc)
 
-// Check if a name is a recognized built in function
+
+// Purpose: Map reserved keywords and built-in function names to Terminal tokens.
+// Arguments: name - identifier string to classify.
+// Returns: Some Terminal or None.
 let private recognizeFunction (name: string) : Terminal option =
     match name.ToLower() with
     | "for" -> Some For | "to" -> Some To | "step" -> Some Step
@@ -124,6 +142,9 @@ let private recognizeFunction (name: string) : Terminal option =
     | _ -> None
 
 // Lexer function - converts input string to list of terminals
+// Purpose: Convert a raw input string into a list of Terminal tokens.
+// Arguments: input - string entered by the user.
+// Returns: Terminal list representing the token stream.
 let lexer input = 
     let rec scan input =
         match input with
