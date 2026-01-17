@@ -10,6 +10,9 @@ type Number =
     | Rational of int64 * int64  // numerator, denominator
     | Complex of float * float    // real, imaginary
 
+// Purpose: Stop divide by zero
+// Arguments: b is divisor, op is the work to run
+// Returns: op() result or throws
 let private guardZero b op =
     match b with
     | Integer 0L | Float 0.0 -> failwith "Division by zero"
@@ -17,11 +20,17 @@ let private guardZero b op =
     | _ -> op ()
 
 // Greatest Common Divisor using Euclidean algorithm
+// Purpose: Get greatest common divisor for rationals
+// Arguments: a, b numbers
+// Returns: gcd as int64
 let rec private gcd a b =  // int64 arguments
     if b = 0L then abs a
     else gcd b (a % b)
 
 // Simplify a rational number and avoid division by zero
+// Purpose: Reduce num/den and fix sign
+// Arguments: num, den
+// Returns: (num, den) simplified
 let private simplifyRational (num: int64) (den: int64) =
     if den = 0L then
         failwith "Division by zero: denominator cannot be zero"
@@ -37,12 +46,18 @@ let private simplifyRational (num: int64) (den: int64) =
 
 // NUMBER CONVERSION //
 
+// Purpose: Turn Number into float
+// Arguments: num
+// Returns: float value
 let toFloat = function
     | Integer i -> float i
     | Float f -> f
     | Rational (n, d) -> float n / float d
     | Complex (r, _) -> r
 
+// Purpose: Turn Number into (real, imag)
+// Arguments: num
+// Returns: (r, i)
 let toComplex = function
     | Integer i -> (float i, 0.0)
     | Float f -> (f, 0.0)
@@ -50,6 +65,9 @@ let toComplex = function
     | Complex (r, i) -> (r, i)
 
 // Simplify a number to its simplest form
+// Purpose: Clean up Number output
+// Arguments: num
+// Returns: simplified Number
 let simplifyNumber = function
     | Rational (n, d) when d = 1L -> Integer n
     | Rational (n, d) -> 
@@ -61,6 +79,9 @@ let simplifyNumber = function
 
 // TYPE COERCION for static typing
 
+// Purpose: Force Number to int
+// Arguments: num
+// Returns: Integer Number
 let coerceToInt (num: Number) : Number =
     match num with
     | Integer i -> Integer i
@@ -68,9 +89,15 @@ let coerceToInt (num: Number) : Number =
     | Rational (n, d) -> Integer (n / d)
     | Complex (r, _) -> Integer (int64 r)
 
+// Purpose: Force Number to float
+// Arguments: num
+// Returns: Float Number
 let coerceToFloat (num: Number) : Number =
     Float (toFloat num)
 
+// Purpose: Force Number to rational (float gets approx)
+// Arguments: num
+// Returns: Rational Number
 let coerceToRational (num: Number) : Number =
     match num with
     | Integer i -> Rational (i, 1L)
@@ -84,6 +111,9 @@ let coerceToRational (num: Number) : Number =
         let numerator = int64 (r * float denominator)
         simplifyNumber (Rational (numerator, denominator))
 
+// Purpose: Force Number to complex
+// Arguments: num
+// Returns: Complex Number
 let coerceToComplex (num: Number) : Number =
     let (r, i) = toComplex num
     Complex (r, i)
@@ -91,6 +121,9 @@ let coerceToComplex (num: Number) : Number =
 
 // ARITHMETIC OPERATIONS (Public Interface)
 
+// Purpose: a + b
+// Arguments: a, b
+// Returns: sum Number
 let add a b =
     match (a, b) with
     | Integer x, Integer y -> Integer (x + y)
@@ -113,6 +146,9 @@ let add a b =
         let (r2, i2) = toComplex other
         simplifyNumber (Complex (r + r2, i + i2))
 
+// Purpose: a - b
+// Arguments: a, b
+// Returns: diff Number
 let subtract a b =
     match (a, b) with
     | Integer x, Integer y -> Integer (x - y)
@@ -138,6 +174,9 @@ let subtract a b =
         let (r2, i2) = toComplex other
         simplifyNumber (Complex (r2 - r, i2 - i))
 
+// Purpose: a * b
+// Arguments: a, b
+// Returns: product Number
 let multiply a b =
     match (a, b) with
     | Integer x, Integer y -> Integer (x * y)
@@ -160,6 +199,9 @@ let multiply a b =
         let (r2, i2) = toComplex other
         simplifyNumber (Complex (r * r2 - i * i2, r * i2 + i * r2))
 
+// Purpose: a / b
+// Arguments: a, b
+// Returns: quotient Number
 let divide a b =
     match (a, b) with
     | Integer x, Integer y when y = 0L -> 
@@ -218,6 +260,9 @@ let divide a b =
         simplifyNumber (Complex ((r2 * r + i2 * i) / denominator, 
                                  (i2 * r - r2 * i) / denominator))
 
+// Purpose: a % b
+// Arguments: a, b
+// Returns: modulo Number
 let modulo a b =
     match (a, b) with
     | Integer x, Integer y when y = 0L ->
@@ -229,6 +274,9 @@ let modulo a b =
         if fb = 0.0 then failwith "Modulo by zero"
         Float (fa % fb)
 
+// Purpose: a ^ b
+// Arguments: a, b
+// Returns: power Number
 let power a b =
     match (a, b) with
     | Integer x, Integer y when y >= 0L ->
@@ -262,6 +310,9 @@ let power a b =
         let fb = toFloat b
         Float (fa ** fb)
 
+// Purpose: -num
+// Arguments: num
+// Returns: negated Number
 let negate = function
     | Integer i -> Integer (-i)
     | Float f -> Float (-f)
@@ -271,6 +322,9 @@ let negate = function
 
 // STRING REPRESENTATION
 
+// Purpose: Number to string
+// Arguments: num
+// Returns: string
 let toString = function
     | Integer i -> string i
     | Float f -> string f

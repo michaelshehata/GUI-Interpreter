@@ -10,8 +10,10 @@ open PlotBuffer
 // Exceptions
 let runtimeError = System.Exception("Runtime error")
 
-// Parser and evaluator function - parses and computes result
-let rec parseNeval tList = 
+// Purpose: parse and  evaluate expression token streeam using precedence rules
+// Arguments: tList - list of Terminal tokens representing an expression
+// Returns: (remainingTokens, computedValue) as Terminal list * Number.
+let rec parseNeval tList =
     let rec E tList = (T >> Eopt) tList
     and Eopt (tList, value) = 
         match tList with
@@ -303,9 +305,11 @@ let rec parseNeval tList =
     let (remaining, result) = E tList
     (remaining, result)
 
-// Statement parser - handles assignments, for loops, and expressions
 // Must use 'and' to make it mutually recursive with executeForLoop
-and parseStatement tList = 
+// Purpose: parse and execute statements
+// Arguments: tList - list of T
+// Returns: (remainingTokens, lastResult) as Terminal list * Number.
+and parseStatement tList =
     match tList with
     | [] -> ([], Integer 0L)
     
@@ -434,7 +438,9 @@ and parseStatement tList =
         else
             (remaining, result)
 
-// Loop execution - uses 'and' for mutual recursion with parseStatement
+
+// Arguments: varName, startVal, endVal, stepVal option, body tokens.
+// Returns: Last evaluated result from the loop body as Number.
 and executeForLoop (varName: string) (startVal: Number) (endVal: Number) (stepVal: Number option) (body: Terminal list) =
     let step = match stepVal with
                | Some s -> NumberSystem.toFloat s

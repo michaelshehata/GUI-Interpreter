@@ -9,6 +9,9 @@ open AST
 let parseError = System.Exception("Parser error")
 
 // Parser function - validates syntax without evaluation
+// Purpose: Check token list is valid 
+// Arguments: tList tokens
+// Returns: [] if ok, else throws
 let parser tList = 
     let rec E tList = (T >> Eopt) tList
     and Eopt tList = 
@@ -57,6 +60,9 @@ let parser tList =
     | _ -> raise parseError
 
 // Parse tree builder
+// Purpose: Build parse tree for an expression
+// Arguments: tList tokens
+// Returns: (remaining, tree)
 let parseExpTree tList =    
     let rec E tList = 
         let (remaining,tTree) = T tList
@@ -150,6 +156,9 @@ let parseExpTree tList =
     (remaining, tree)
 
 
+// Purpose: Build parse tree for full statements (assignments/loops/exprs)
+// Arguments: tList tokens
+// Returns: (remaining, tree)
 let parseStatementTree tList = 
     
     
