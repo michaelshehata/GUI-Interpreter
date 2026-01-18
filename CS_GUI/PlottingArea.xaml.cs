@@ -32,14 +32,28 @@ namespace CS_GUI
         private bool _axesInitialised = false;
 
 
-
+        /// <summary>
+        /// Specifies the algorithm used to interpolate values between data points.
+        /// </summary>
+        /// <remarks>Use <see cref="InterpolationMode"/> to control how intermediate values are calculated
+        /// when generating or transforming data. The available modes determine the smoothness and characteristics of
+        /// the interpolation.</remarks>
         public enum InterpolationMode
         {
             Linear,
             Spline
         }
 
+        /// <summary>
+        /// Gets or sets the interpolation mode used for rendering operations.
+        /// </summary>
         public InterpolationMode Interpolation { get; set; } = InterpolationMode.Linear;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlottingArea"/> class.
+        /// </summary>
+        /// <remarks>Sets up the plotting area with a default plot model and associates it with the plot
+        /// view control.</remarks>
         public PlottingArea()
         {
             InitializeComponent();
@@ -47,10 +61,20 @@ namespace CS_GUI
             PlotViewControl.Model = _model;
         }
 
+
+        /// <summary>
+        /// Takes in a collection of (x, y) points representing the results of a function evaluation to be plotted, and the x-axis range.
+        /// Handles plotting these points within the specified range, managing discontinuities, and adjusting axis scaling.
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="xMin"></param>
+        /// <param name="xMax"></param>
         public void PlotFunction(IEnumerable<Tuple<double, double>> points,
                                  double xMin, double xMax)
         {
 
+
+            // early exit if plot not ready
             if (!PlotViewControl.IsLoaded ||
                 PlotViewControl.ActualWidth <= 1 ||
                 PlotViewControl.ActualHeight <= 1)
@@ -64,7 +88,7 @@ namespace CS_GUI
             const double jumpThreshold = 10.0;   // asymptote detection
             const double yVisualLimit = 10.0;   // ignore extreme values for scaling
 
-            bool hasDiscontinuities = false;
+            bool hasDiscontinuities = false; // for spline safety check
 
             var validYsForScaling = new List<double>();
 
@@ -73,6 +97,7 @@ namespace CS_GUI
 
             DataPoint? lastPoint = null;
 
+            // process points
             foreach (var p in points)
             {
                 double x = p.Item1;
@@ -206,7 +231,6 @@ namespace CS_GUI
 
 
             // disable spline if unsafe
-
             if (hasDiscontinuities && Interpolation == InterpolationMode.Spline)
             {
                 foreach (var s in _model.Series.OfType<LineSeries>())
@@ -216,12 +240,18 @@ namespace CS_GUI
             _model.InvalidatePlot(true);
         }
 
+        /// <summary>
+        /// Resets the axis initialisation flag, forcing axes to be recalculated on the next plot.
+        /// </summary>
         public void ResetAxes()
         {
             _axesInitialised = false;
         }
 
-
+        /// <summary>
+        /// LineSeries factory method
+        /// </summary>
+        /// <returns></returns>
         private LineSeries CreateSeries()
         {
             var series = new LineSeries
@@ -239,6 +269,14 @@ namespace CS_GUI
             return series;
         }
 
+        /// <summary>
+        /// Given a point (x0, f(x0)) and the slope of the tangent line at that point, plots the tangent line over the specified x-range.
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="fx0"></param>
+        /// <param name="slope"></param>
+        /// <param name="xMin"></param>
+        /// <param name="xMax"></param>
         public void PlotTangentLine(
             double x0,
             double fx0,
@@ -277,6 +315,9 @@ namespace CS_GUI
             _model.InvalidatePlot(true);
         }
 
+        /// <summary>
+        /// Clear all tangent lines from the plot.
+        /// </summary>
         public void ClearTangents()
         {
             var tangents = _model.Series
@@ -291,6 +332,14 @@ namespace CS_GUI
             _model.InvalidatePlot(true);
         }
 
+        /// <summary>
+        /// Given a collection of (x, y) points representing a function, plots the area under the curve between limits a and b. Displays the approximate area value in a mouse-over label.
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="areaValue"></param>
+        /// <param name="expression"></param>
         public void PlotIntegrationArea(
             IEnumerable<Tuple<double, double>> points,
             double a,
@@ -330,7 +379,9 @@ namespace CS_GUI
         }
 
 
-
+        /// <summary>
+        /// Clear all integration areas from the plot.
+        /// </summary>
         public void ClearIntegrals()
         {
             var integrals = _model.Series

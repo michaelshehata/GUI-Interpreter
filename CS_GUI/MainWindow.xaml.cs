@@ -27,6 +27,11 @@ namespace CS_GUI
             DataContext = this;
         }
 
+        /// <summary>
+        /// Adds a new entry to the calculation history.
+        /// </summary>
+        /// <param name="expression">Mathematical expression entered</param>
+        /// <param name="result">Result of mathematical expression</param>
         private void AddToHistory(string expression, string result)
         {
             History.Insert(0, new CalculationHistoryItem
@@ -40,6 +45,15 @@ namespace CS_GUI
 
         }
 
+        /// <summary>
+        /// Handles the Click event of the Calculate button, evaluating the user input and updating the plot and history
+        /// accordingly.
+        /// </summary>
+        /// <remarks>This method processes the expression entered by the user, displays the result, and
+        /// updates the plot area if applicable. If an error occurs during evaluation, the error message is displayed to
+        /// the user.</remarks>
+        /// <param name="sender">The source of the event, typically the Calculate button.</param>
+        /// <param name="e">The event data associated with the Click event.</param>
         private void buttonCalculate_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -72,12 +86,24 @@ namespace CS_GUI
             }
 
         }
-
+        /// <summary>
+        /// Handles the click event of the Clear History button and clears the history collection.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Clear History button.</param>
+        /// <param name="e">The event data associated with the button click.</param>
         private void ClearHistoryButton_Click(object sender, RoutedEventArgs e)
         {
             History.Clear();
         }
 
+        /// <summary>
+        /// Handles the click event of the Plot button to generate and display a plot of the user-defined function.
+        /// </summary>
+        /// <remarks>This method retrieves the function expression and plotting parameters from the user
+        /// interface, passes this info to the interpreter which returns list of points, and updates the plot display accordingly. If an error occurs during
+        /// processing, an error message is displayed to the user.</remarks>
+        /// <param name="sender">The source of the event, typically the Plot button.</param>
+        /// <param name="e">The event data associated with the click event.</param>
         private void buttonPlot_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -107,6 +133,13 @@ namespace CS_GUI
                 errorBox.Text = ex.Message;
             }
         }
+
+        /// <summary>
+        /// Retrieves the current mathematical expression entered by the user, excluding any preceding assignment or
+        /// variable name.
+        /// </summary>
+        /// <returns>A string containing the current expression from the input box. If the input includes an assignment (e.g., "y = x^2")
+        /// returns the portion after the equals sign; otherwise, returns the entire trimmed input.</returns>
         private string GetCurrentExpression()
         {
             string text = inputBox.Text;
@@ -115,6 +148,16 @@ namespace CS_GUI
                 : text.Trim();
         }
 
+        /// <summary>
+        /// Handles the Click event of the Derivative button to numerically compute the derivative of the current
+        /// expression at a specified point.
+        /// </summary>
+        /// <remarks>This method retrieves the current mathematical expression and the value of <c>x₀</c>
+        /// from the user interface, computes the numerical derivative at that point, and adds the result to the
+        /// calculation history. If an error occurs during computation, an error message is displayed to the
+        /// user.</remarks>
+        /// <param name="sender">The source of the event, typically the Derivative button.</param>
+        /// <param name="e">The event data associated with the Click event.</param>
         private void buttonDerivative_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -135,6 +178,15 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the Root button to compute the root of the current mathematical expression within
+        /// a specified interval.
+        /// </summary>
+        /// <remarks>This method retrieves the current expression and interval endpoints from the user
+        /// interface, then attempts to find a root using the bisection method. If the operation fails, an error message
+        /// is displayed to the user.</remarks>
+        /// <param name="sender">The source of the event, typically the Root button.</param>
+        /// <param name="e">The event data associated with the click event.</param>
         private void buttonRoot_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -158,6 +210,16 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the Integrate button, performing numerical integration of the current expression
+        /// over the specified interval.
+        /// </summary>
+        /// <remarks>This method retrieves the current mathematical expression and the integration bounds
+        /// from the user interface, computes the definite integral using the trapezoidal rule, and adds the result to
+        /// the calculation history. If an error occurs during integration, an error message is displayed to the
+        /// user.</remarks>
+        /// <param name="sender">The source of the event, typically the Integrate button.</param>
+        /// <param name="e">The event data associated with the button click.</param>
         private void buttonIntegrate_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -179,6 +241,14 @@ namespace CS_GUI
                 errorBox.Text = ex.Message;
             }
         }
+        /// <summary>
+        /// Handles the Click event of the Parse Tree button, generating and displaying the parse tree for the current
+        /// input text.
+        /// </summary>
+        /// <remarks>If an error occurs while generating the parse tree, the error message is displayed to
+        /// the user.</remarks>
+        /// <param name="sender">The source of the event, typically the Parse Tree button.</param>
+        /// <param name="e">The event data associated with the Click event.</param>
         private void buttonParseTree_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -196,6 +266,15 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the event when the selection changes in the interpolation mode combo box.
+        /// </summary>
+        /// <remarks>Updates the interpolation mode of the plot area based on the user's selection in
+        /// the combo box. This method is intended to be used as an event handler for the <see
+        /// cref="SelectionChangedEventHandler"/> event of a combo box that allows users to choose the interpolation
+        /// mode for plotting.</remarks>
+        /// <param name="sender">The source of the event, typically the interpolation combo box.</param>
+        /// <param name="e">The event data that contains information about the selection change.</param>
         private void InterpolationCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!IsLoaded) return;
@@ -214,6 +293,15 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the click event for the "Plot Tangent" button, calculating and plotting the tangent line to the
+        /// current expression at a specified point.
+        /// </summary>
+        /// <remarks>This method evaluates the current mathematical expression at the specified <c>x</c>
+        /// value, computes the numerical derivative at that point, and plots the resulting tangent line on the existing
+        /// plot area. Any errors encountered during evaluation or plotting are displayed in the error box.</remarks>
+        /// <param name="sender">The source of the event, typically the button that was clicked.</param>
+        /// <param name="e">The event data associated with the click event.</param>
         private void buttonPlotTangent_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -246,12 +334,26 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the Clear Tangents button and removes all tangent lines from the plot area.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Clear Tangents button.</param>
+        /// <param name="e">The event data associated with the Click event.</param>
         private void buttonClearTangents_Click(object sender, RoutedEventArgs e)
         {
             PlotArea.ClearTangents();
         }
 
-
+        /// <summary>
+        /// Handles the click event for the button that plots the definite integral of the current mathematical
+        /// expression over a specified interval.
+        /// </summary>
+        /// <remarks>This method retrieves the current expression and integration bounds from the user
+        /// interface, computes the definite integral using the trapezoidal rule, and displays both the calculated area
+        /// and the corresponding plot. If an error occurs during the process, an error message is displayed to the
+        /// user.</remarks>
+        /// <param name="sender">The source of the event, typically the button that was clicked.</param>
+        /// <param name="e">The event data associated with the click event.</param>
         private void buttonPlotIntegral_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -295,12 +397,26 @@ namespace CS_GUI
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the Clear Integrals button and removes all integral markers from the plot area.
+        /// </summary>
+        /// <param name="sender">The source of the event, typically the Clear Integrals button.</param>
+        /// <param name="e">The event data associated with the Click event.</param>
         private void buttonClearIntegrals_Click(object sender, RoutedEventArgs e)
         {
             PlotArea.ClearIntegrals();
      
         }
 
+        /// <summary>
+        /// Handles changes to the aspect ratio lock checkbox and updates the plot area accordingly.
+        /// </summary>
+        /// <remarks>When the aspect ratio lock is toggled, this method updates the plot area's aspect
+        /// ratio setting and attempts to replot the current function using the latest parameters. If the plot cannot be
+        /// updated (for example, due to invalid input), the error is silently ignored.</remarks>
+        /// <param name="sender">The checkbox control that triggered the event. Its <see cref="CheckBox.IsChecked"/> value determines whether
+        /// the plot area's aspect ratio is locked.</param>
+        /// <param name="e">The event data associated with the checkbox state change.</param>
         private void AspectRatioCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             PlotArea.LockAspectRatio =

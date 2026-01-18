@@ -8,6 +8,10 @@ namespace CS_GUI
 {
     public class CalculationHistoryItem
     {
+        /**
+         * Class representing a single calculation history item.
+         * 
+         * **/
         required public string Expression { get; set; }
         required public string Result { get; set; }
 
